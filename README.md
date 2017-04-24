@@ -1,2 +1,2 @@
-# wheel_bot
-Firmware and utility software for wheel bot.
+# wb-comm
+Communication system for the wheel bot.
