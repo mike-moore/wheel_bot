@@ -10,47 +10,44 @@ void Control::testDrive(){
     switch(TestDriveState)
     {
         case FWD_POS_TEST:
-            if(!onePass){
-                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::POSITION; 
-                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::POSITION; 
-                onePass=true;
+            if(firstPass){
+                State.effectors.rightMotor.PositionCmd(720); 
+                State.effectors.leftMotor.PositionCmd(720); 
+                firstPass=false;
             }
-            State.effectors.rightMotor.PositionCmd(720); 
-            State.effectors.leftMotor.PositionCmd(720); 
+            /// - Keep running the controller until it's put back in to the IDLE
+            ///   mode
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
 
             if (State.effectors.leftMotor.ControlMode == Spg30MotorDriver::IDLE && 
                 State.effectors.rightMotor.ControlMode == Spg30MotorDriver::IDLE) {
                 Serial.println("FWD POSITION TEST COMPLETE");
                 delay(5000);
                 Serial.println("STARTING BWD POSITION TEST");
+                firstPass = true;
                 TestDriveState = BWD_POS_TEST;
             }
 
         break;
 
         case BWD_POS_TEST:
-            State.effectors.rightMotor.ControlMode = Spg30MotorDriver::POSITION; 
-            State.effectors.rightMotor.PositionCmd(-720); 
-            State.effectors.leftMotor.ControlMode = Spg30MotorDriver::POSITION; 
-            State.effectors.leftMotor.PositionCmd(-720); 
-
-            if (State.effectors.rightMotor.ReachedPosition()) {
-                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
-            }else{
-                State.effectors.rightMotor.run();
+            if(firstPass){
+                State.effectors.rightMotor.PositionCmd(-720); 
+                State.effectors.leftMotor.PositionCmd(-720); 
+                firstPass=false;
             }
-
-            if (State.effectors.leftMotor.ReachedPosition()) {
-                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
-            }else{
-                State.effectors.leftMotor.run();
-            }
+            /// - Keep running the controller until it's put back in to the IDLE
+            ///   mode
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
 
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
                 Serial.println("BWD POSITION TEST COMPLETE");
                 delay(5000);
                 Serial.println("STARTING FWD POSITION TEST");
+                firstPass = true;
                 TestDriveState = FWD_POS_TEST;
             }
 

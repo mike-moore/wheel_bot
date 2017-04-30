@@ -42,10 +42,7 @@ void Spg30MotorDriver::run(){
             }
             if(_motorIsRunning){
                 if((abs(abs(_encoderCount)-abs(_countInit))) >= abs(_tickNumber)){
-                    _positionReached = true;
-                    _positionCmd = 0;
-                    _encoderCount = 0;
-                    _motorBrake();
+                    ControlMode = IDLE;
                 }
             }
         break;
@@ -55,6 +52,9 @@ void Spg30MotorDriver::run(){
         break;
 
         case IDLE:
+            _positionReached = true;
+            _positionCmd = 0;
+            _encoderCount = 0;
             _motorBrake();
         break;
 

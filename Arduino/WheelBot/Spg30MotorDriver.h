@@ -103,19 +103,15 @@ inline void Spg30MotorDriver::VelocityCmd(int velocityCmd){
 }
 
 inline void Spg30MotorDriver::PositionCmd(int16_t positionCmd){
+  ControlMode = POSITION;
   // - Logic here checks that we have a non-zero position command,
   //   AND that we're not already trying to reach a position, AND
   //   that we haven't received the same command we're currently executing.
-  if (positionCmd!=0 && _positionReached && positionCmd!=_positionCmd &&
-      ControlMode == POSITION){
+  if (positionCmd!=0 && _positionReached && positionCmd!=_positionCmd){
     _positionCmd = positionCmd;
     _tickNumber = positionCmd;
     _countInit = _encoderCount;
     _positionReached = false;
-  }
-  run();
-  if(_positionReached){
-    ControlMode = IDLE;
   }
 }
 
