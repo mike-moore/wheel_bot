@@ -8,13 +8,13 @@
 // - Initialize an instance of the robot's state registry
 RobotState robotState;
 // - Initialize an instance of the protbuff serial class to do communication
-ProtobuffSerial serialComm;
+//ProtobuffSerial serialComm;
 // - Initialize an instance of the command and data handler
-CommandAndDataHandler cmdAndDataHandler(serialComm.Commands, serialComm.Telemetry, robotState);
+//CommandAndDataHandler cmdAndDataHandler(serialComm.Commands, serialComm.Telemetry, robotState);
 // - Initiliaze an instance of the robot navigation
-Navigation navigation(robotState);
+//Navigation navigation(robotState);
 // - Initiliaze an instance of the robot guidance
-Guidance guidance(robotState);
+//Guidance guidance(robotState);
 // - Initiliaze an instance of the robot control
 Control control(robotState);
 
@@ -29,8 +29,9 @@ bool mtrL_A_set, mtrL_B_set;
 bool mtrR_A_set, mtrR_B_set;
 
 void setup(){
+  Serial.begin(57600);
   // - Serial comm init
-  serialComm.InitHw();
+  //serialComm.InitHw();
   // - Very Important: attach interrupt service routines for motor encoders
   setup_encoders();
 }
@@ -53,21 +54,21 @@ void loop(){
     /// - Save off current millis. Used for control loop timing.
     previousMillis = currentMillis;
     /// - Read commands from the serial port.
-    serialComm.Rx();
+    //serialComm.Rx();
     /// - Forward received commands on to C&DH
-    if (serialComm.NewCommandsArrived()){
-      cmdAndDataHandler.ProcessCmds();
-    }
+    //if (serialComm.NewCommandsArrived()){
+    //  cmdAndDataHandler.ProcessCmds();
+    //}
     /// Execute the robot navigation
-    navigation.Execute();
+    //navigation.Execute();
     /// Execute the robot guidance
-    guidance.Execute();
+    //guidance.Execute();
     /// Execute the robot control logic 
     control.Execute();
     /// Have C&DH prepare the robot telemetry for transmission
-    cmdAndDataHandler.LoadTelemetry();
+    //cmdAndDataHandler.LoadTelemetry();
     /// - Send the telemetry over the serial port
-    serialComm.Tx();
+    //serialComm.Tx();
   }
   
 }

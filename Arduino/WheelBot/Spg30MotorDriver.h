@@ -48,9 +48,9 @@ class Spg30MotorDriver {
   /// @brief Driver's primary update routine. This runs the
   ///        driver's internal state machine.
   void run();
-  /// @brief User should set one of these commands after specifying 
-  ///        which control mode they want to use.
-  void PositionCmd(int16_t positionCmd);
+  /// @brief Motor control command functions
+  void FwdPositionCmd(uint16_t positionCmd);
+  void BwdPositionCmd(uint16_t positionCmd);
   void VelocityCmd(int velocityCmd);
   /// @brief Functions the user can call to see if their commanded
   ///        position and velocity have been reached.
@@ -65,6 +65,7 @@ class Spg30MotorDriver {
   void _motorForward();
   void _motorBrake();
   void _printMotorInfo();
+  void _cmdPosition(uint16_t positionCmd);
   uint_least8_t _loopRateMillis;
   uint_least8_t _motorPinA1;
   uint_least8_t _motorPinB1;
@@ -75,6 +76,8 @@ class Spg30MotorDriver {
   long _tickNumber;
   int _velocityCmd;
   int16_t _positionCmd;
+  bool _driveForward; 
+  bool _driveBackward; 
   uint_least8_t _pwmCmd;
   int _measuredSpeed;
   unsigned long _lastMillis;
@@ -102,16 +105,32 @@ inline void Spg30MotorDriver::VelocityCmd(int velocityCmd){
   }
 }
 
-inline void Spg30MotorDriver::PositionCmd(int16_t positionCmd){
-  ControlMode = POSITION;
-  // - Logic here checks that we have a non-zero position command,
-  //   AND that we're not already trying to reach a position, AND
-  //   that we haven't received the same command we're currently executing.
+inline void Spg30MotorDriver::FwdPositionCmd(uint16_t positionCmd){
+  _driveForward = true;
+  _driveBackward = false;
+  _cmdPosition(positionCmd);
+  Serial.print("Accepting fwd position command (deg) : ");
+  Serial.println(positionCmd);
+}
+
+inline void Spg30MotorDriver::BwdPositionCmd(uint16_t positionCmd){
+  _driveBackward = true;
+  _driveForward = false;
+  _cmdPosition(positionCmd);
+  Serial.print("Accepting bwd position command (deg) : ");
+  Serial.println(positionCmd);
+}
+
+// - Logic here checks that we have a non-zero position command,
+//   AND that we're not already trying to reach a position, AND
+//   that we haven't received the same command we're currently executing.
+inline void Spg30MotorDriver::_cmdPosition(uint16_t positionCmd){
   if (positionCmd!=0 && _positionReached && positionCmd!=_positionCmd){
     _positionCmd = positionCmd;
     _tickNumber = positionCmd;
     _countInit = _encoderCount;
     _positionReached = false;
+    ControlMode = POSITION;
   }
 }
 

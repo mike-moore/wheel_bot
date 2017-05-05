@@ -14,6 +14,8 @@ Spg30MotorDriver::Spg30MotorDriver(uint_least8_t loopRateMillis, uint_least8_t m
     _tickNumber(0),
     _velocityCmd(0),
     _positionCmd(0),
+    _driveForward(false),
+    _driveBackward(false),
     _pwmCmd(0),
     _measuredSpeed(0),
     _lastMillis(0),
@@ -42,6 +44,7 @@ void Spg30MotorDriver::run(){
             }
             if(_motorIsRunning){
                 if((abs(abs(_encoderCount)-abs(_countInit))) >= abs(_tickNumber)){
+                    Serial.println("target reached");
                     ControlMode = IDLE;
                 }
             }
@@ -99,9 +102,10 @@ void Spg30MotorDriver::_updatePid(){
 }
 
 void Spg30MotorDriver::_positionControl(){
-    if(_positionCmd > 0){
+    if(_driveForward){
         _motorForward();
-    }else if(_positionCmd < 0){
+    }
+    if(_driveBackward){
         _motorBackward();
     }
 }
