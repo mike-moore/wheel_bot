@@ -46,11 +46,37 @@ void Control::testDrive(){
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
                 Serial.println("BWD POSITION TEST COMPLETE");
+                Serial.println("VELOCITY TEST STARTING");
                 firstPass = true;
-                TestDriveState = FWD_POS_TEST;
+                TestDriveState = VEL_TEST;
             }
 
         break;
 
+        case VEL_TEST:
+            /// - Used to ramp up the velocity command
+            float lengthOfTestInSeconds = 5.0;
+            float maxRpm = 40.0;
+            numSecondsInTest += cycleTimeMillis/1000;
+            /// - Set each motor contoller to velocity control mode.
+            State.effectors.rightMotor.ControlMode = Spg30MotorDriver::VELOCITY; 
+            State.effectors.leftMotor.ControlMode = Spg30MotorDriver::VELOCITY; 
+            /// - Set the velocity command proportionally to the length of time
+            ///   in this test velocity mode. R motor gets positive vel cmd,
+            ///   L motor gets negative vel cmd
+            int velocityCmd = (int) (numSecondsInTest/lengthOfTestInSeconds)*maxRpm;
+            State.effectors.rightMotor.VelocityCmd(velocityCmd); 
+            State.effectors.leftMotor.VelocityCmd(-1.0*velocityCmd); 
+            /// - Run the motor controller until the end of the test
+            if (numSecondsInTest < lengthOfTestInSeconds) {
+                State.effectors.rightMotor.run();
+                State.effectors.leftMotor.run();
+            }else{
+                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
+                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
+                Serial.println("VELOCITY TEST COMPLETE");
+                TestDriveState = FWD_POS_TEST;
+            }
+        break;        
     }
 }

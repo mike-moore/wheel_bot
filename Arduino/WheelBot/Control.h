@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////
 class Control { 
  public:
-    Control(RobotState& state) : State(state), ControlWaitCycles(0), firstPass(true) {};
+    Control(RobotState& state) : State(state), ControlWaitCycles(0), numSecondsInTest(0.0), firstPass(true) {};
     ~Control(){};
 
     void Execute();
@@ -36,11 +36,10 @@ class Control {
 	{
 	    FWD_POS_TEST = 0,
 	    BWD_POS_TEST = 1,
-	    FWD_VEL_TEST = 2,
-	    ZERO_VEL_TEST = 3,
-	    BWD_VEL_TEST = 4
+	    VEL_TEST = 2
 	};
     TestDriveRoute TestDriveState;
+    float numSecondsInTest;
     bool firstPass;
 };
   
