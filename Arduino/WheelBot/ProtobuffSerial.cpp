@@ -60,12 +60,12 @@ int ProtobuffSerial::Rx() {
         ClearBuffersAndReset();
     }else if( rx_status == RX_PACKET_READY){
         if (!Decode()){
-//            Serial.println("Attempting to decode : ");
-//            PrintHex8(RxBuffer, RxByteCounter);
-//            Serial.print("Which is ");
-//            Serial.print(RxByteCounter);
-//            Serial.println(" bytes");
-//            Serial.println("");
+            Serial.println("Attempting to decode : ");
+            PrintHex8(RxBuffer, RxByteCounter);
+            Serial.print("Which is ");
+            Serial.print(RxByteCounter);
+            Serial.println(" bytes");
+            Serial.println("");
             Serial.println("Decode FAIL");
             ClearBuffersAndReset();
             rx_status = UNLOAD_FAIL;

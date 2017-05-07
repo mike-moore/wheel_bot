@@ -30,8 +30,8 @@ static const int _pwmLookup[30] =
 class Spg30MotorDriver { 
  public:
   /// @brief Construct the driver by providing all Arduino pin assignments
-  Spg30MotorDriver(uint_least8_t loopRateMillis, uint_least8_t motorPinA1, 
-  	               uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long int& encoderCount,
+  Spg30MotorDriver(uint_least8_t motorPinA1, uint_least8_t motorPinB1, 
+                   uint_least8_t pwmPin, volatile long int& encoderCount,
   	               int & motorSpeed);
 
   /// @brief Defines this motor driver's modes of operation.
@@ -76,7 +76,6 @@ class Spg30MotorDriver {
   void _motorBrake();
   void _printMotorInfo();
   void _cmdPosition(uint16_t positionCmd);
-  uint_least8_t _loopRateMillis;
   uint_least8_t _motorPinA1;
   uint_least8_t _motorPinB1;
   uint_least8_t _pwmPin;
@@ -90,7 +89,6 @@ class Spg30MotorDriver {
   bool _driveBackward; 
   uint_least8_t _pwmCmd;
   int _errorAccum;
-  unsigned long _lastMillis;
   unsigned long _lastMilliPrint;
   float _Kp;
   float _Ki;

@@ -45,6 +45,7 @@ void CommandAndDataHandler::LoadTelemetry() {
 
 void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
     if (rover_cmd.Id == DO_TEST_DRIVE){
+        Serial.println("STARTING TEST DRIVE");
         State.DoTestDrive = true;
     }
     if (rover_cmd.Id == STOP_TEST_DRIVE){

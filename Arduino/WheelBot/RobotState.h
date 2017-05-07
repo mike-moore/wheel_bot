@@ -18,6 +18,8 @@
 #include "comm_packet.pb.h"
 #include "QueueList.h"
 
+extern const long cycleTimeControl;
+
 ///////////////////////////////////////////////////////////////
 /// @class RobotState
 /// @ingroup WheelBot

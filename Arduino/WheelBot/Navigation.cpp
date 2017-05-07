@@ -5,9 +5,9 @@ void Navigation::InitSensors() {
 }
 
 void Navigation::Execute() {
-    State.SensedHeading = State.sensors.magnetometer.ReadHeading();
+    //State.SensedHeading = State.sensors.magnetometer.ReadHeading();
     State.SensedDistance = 2.0;
-    Serial.print("Sensed heading : ");
-    Serial.println(State.SensedHeading);
+    //Serial.print("Sensed heading : ");
+    //Serial.println(State.SensedHeading);
 }
 

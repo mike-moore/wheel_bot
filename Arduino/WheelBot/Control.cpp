@@ -8,17 +8,22 @@ void Control::Execute() {
             if (_headingError()){
                 Mode = ROTATIONAL_CTRL;
             }
+            if (State.DoTestDrive){
+                Mode = TEST_DRIVE;
+            }
         break;
 
         case ROTATIONAL_CTRL:
             _performRotationControl();
-            _printHeadingDebug();
+            //_printHeadingDebug();
             if (!_headingError()){
                 Mode = IDLE;
                 _velocityCmd = 0.0;
             }
             State.effectors.rightMotor.VelocityCmd(_velocityCmd); 
-            State.effectors.rightMotor.VelocityCmd(-_velocityCmd); 
+            State.effectors.leftMotor.VelocityCmd(-_velocityCmd); 
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
         break;
 
         case DRIVING_FWD:
@@ -32,6 +37,15 @@ void Control::Execute() {
             State.TargetReached = true;
             Mode = IDLE;
         break;
+        
+        case TEST_DRIVE:
+            _testDrive();
+            if (!State.DoTestDrive){
+                Mode = IDLE;
+                _testDriveState = FWD_POS_TEST;
+            }
+
+        break;
 
         default:
              /// - invalid state - go back to IDLE
@@ -39,10 +53,6 @@ void Control::Execute() {
         break;
     }
 
-    if (!_headingError()) { // && !_distanceError()){
-        State.TargetReached = true;
-        Mode = IDLE;
-    }
 }
 
 bool Control::_headingError(){
@@ -64,12 +74,15 @@ bool Control::_distanceError(){
 }
 
 void Control::_printHeadingDebug(){
-    Serial.print("Current heading : ");
-    Serial.println(State.SensedHeading);
-    Serial.print("Desired heading : ");
-    Serial.println(State.ActiveWayPoint.Heading);
-    Serial.print("Velocity Cmd : ");
-    Serial.println(_velocityCmd);
+  if((millis()-_lastMilliPrint) >= 2000){                     
+        _lastMilliPrint = millis();
+        Serial.print("Current heading : ");
+        Serial.println(State.SensedHeading);
+        Serial.print("Desired heading : ");
+        Serial.println(State.ActiveWayPoint.Heading);
+        Serial.print("Velocity Cmd : ");
+        Serial.println(_velocityCmd);            
+    }
 }
 
 void Control::_printDistanceDebug(){
@@ -98,13 +111,13 @@ void Control::_testDrive(){
             if(_firstPass){
                 Serial.println("FWD POSITION TEST STARTING");
                 State.effectors.rightMotor.FwdPositionCmd(720); 
-                //State.effectors.leftMotor.FwdPositionCmd(720); 
+                State.effectors.leftMotor.FwdPositionCmd(720); 
                 _firstPass=false;
             }
             /// - Keep running the controller until it's put back in to the IDLE
             ///   mode
             State.effectors.rightMotor.run();
-            //State.effectors.leftMotor.run();
+            State.effectors.leftMotor.run();
 
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
@@ -118,7 +131,7 @@ void Control::_testDrive(){
         case BWD_POS_TEST:
             if(_firstPass){
                 Serial.println("BWD POSITION TEST STARTING");
-                //State.effectors.rightMotor.BwdPositionCmd(720); 
+                State.effectors.rightMotor.BwdPositionCmd(720); 
                 State.effectors.leftMotor.BwdPositionCmd(720); 
                 _firstPass=false;
             }
@@ -141,7 +154,7 @@ void Control::_testDrive(){
             /// - Used to ramp up the velocity command
             lengthOfTestInSeconds = 20.0;
             maxRpm = 30.0;
-            _numSecondsInTest += (float) cycleTimeMillis/1000.0;
+            _numSecondsInTest += (float) cycleTimeControl/1000.0;
             /// - Set the velocity command proportionally to the length of time
             ///   in this test velocity mode. R motor gets positive vel cmd,
             ///   L motor gets negative vel cmd
@@ -166,7 +179,7 @@ void Control::_testDrive(){
             /// - Used to ramp up the velocity command
             lengthOfTestInSeconds = 20.0;
             maxRpm = 30.0;
-            _numSecondsInTest += (float) cycleTimeMillis/1000.0;
+            _numSecondsInTest += (float) cycleTimeControl/1000.0;
             /// - Set the velocity command proportionally to the length of time
             ///   in this test velocity mode. R motor gets positive vel cmd,
             ///   L motor gets negative vel cmd
@@ -181,7 +194,7 @@ void Control::_testDrive(){
                 State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
                 State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
                 Serial.println("SLOW DOWN VELOCITY TEST COMPLETE");
-                _testDriveState = FWD_POS_TEST;
+                State.TargetReached = true;
                 _numSecondsInTest = 0.0;
             }
         break;     

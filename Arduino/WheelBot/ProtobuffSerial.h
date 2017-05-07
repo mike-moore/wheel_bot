@@ -19,7 +19,7 @@
 #include "pb_decode.h"
 #include "comm_packet.pb.h"
 
-#define COMM_MAX_BUFF_SIZE 150
+#define COMM_MAX_BUFF_SIZE 200
 
 ///////////////////////////////////////////////////////////////
 /// @class ProtobuffSerial

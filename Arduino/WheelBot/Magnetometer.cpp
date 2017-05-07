@@ -22,17 +22,12 @@ void Magnetometer::Init()
 
 double Magnetometer::ReadHeading()
 {
-    // Time to read the sensors again?
-    if((millis() - timestamp) >= OUTPUT__DATA_INTERVAL)
-    {
-      timestamp = millis();
-      // Update sensor readings
-      _read_mag();
-      // Apply sensor calibration
-      _compensate_sensor_errors();
-      // Run DCM algorithm
-      _compass_heading(); // Calculate magnetic heading
-    }
+    // Update sensor readings
+    _read_mag();
+    // Apply sensor calibration
+    _compensate_sensor_errors();
+    // Run DCM algorithm
+    _compass_heading(); // Calculate magnetic heading
     return MAG_Heading;
 }
 
@@ -121,9 +116,13 @@ void Magnetometer::_compass_heading()
     sin_pitch = sin(0.0);
 
     // Tilt compensated magnetic field X
-    mag_x = magnetom[0] * cos_pitch + magnetom[1] * sin_roll * sin_pitch + magnetom[2] * cos_roll * sin_pitch;
+    mag_x = magnetom[0];// * cos_pitch + magnetom[1] * sin_roll * sin_pitch + magnetom[2] * cos_roll * sin_pitch;
     // Tilt compensated magnetic field Y
-    mag_y = magnetom[1] * cos_roll - magnetom[2] * sin_roll;
+    mag_y = magnetom[1];// * cos_roll - magnetom[2] * sin_roll;
+    //Serial.print("Mag x: ");
+    //Serial.println(mag_x);
+    //Serial.print("Mag y: ");
+    //Serial.println(mag_y);
     // Magnetic Heading
-    MAG_Heading = atan2(-mag_y, mag_x);
+    MAG_Heading = atan2(-mag_y, mag_x)*180.0/3.14159;
 }

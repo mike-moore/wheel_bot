@@ -18,8 +18,19 @@ Guidance guidance(robotState);
 // - Initiliaze an instance of the robot control
 Control control(robotState);
 
-const long cycleTimeMillis = 10;
-unsigned long previousMillis = 0;
+// - Define subsystem execution rates (milliseconds)
+const long cycleTimeCommRx = 20;
+unsigned long previousMillisCommRx = 0;
+const long cycleTimeCommTx = 20;
+unsigned long previousMillisCommTx = 0;
+const long cycleTimeNav = 2000;
+unsigned long previousMillisNav = 0;
+const long cycleTimeGuidance = 1000;
+unsigned long previousMillisGuidance = 0;
+const long cycleTimeRpmCompute = 5;
+unsigned long previousMillisRpmCompute = 0;
+const long cycleTimeControl = 10;
+unsigned long previousMillisControl = 0;
 
 // - Use volatile and global because encoder counts are modified in an
 //   interrupt service routine
@@ -27,6 +38,8 @@ volatile long int mtrR_encoderCount = 0;
 volatile long int mtrL_encoderCount = 0;
 long mtrR_encoderCountPrev = 0;
 long mtrL_encoderCountPrev = 0;
+const long int countsToRpms = 60*(1000/cycleTimeControl)/360;
+const float rpmAlphaFilter = 0.3;
 
 // - Motor speeds. Computed here due to use of interrupts
 int mtrR_speed = 0; int mtrR_speed_prev = 0;
@@ -36,7 +49,6 @@ bool mtrL_A_set, mtrL_B_set;
 bool mtrR_A_set, mtrR_B_set;
 
 void setup(){
-  Serial.begin(57600);
   // - Serial comm init
   serialComm.InitHw();
   // - Init sensors
@@ -59,28 +71,50 @@ void setup_encoders(){
 void loop(){
   unsigned long currentMillis = millis();
 
-  if (currentMillis - previousMillis >= cycleTimeMillis) {
-    /// - Save off current millis. Used for control loop timing.
-    previousMillis = currentMillis;
+  /// - Comm Rx
+  if (currentMillis - previousMillisCommRx >= cycleTimeCommRx) {
+    previousMillisCommRx = currentMillis;
     /// - Read commands from the serial port.
     serialComm.Rx();
     /// - Forward received commands on to C&DH
     if (serialComm.NewCommandsArrived()){
       cmdAndDataHandler.ProcessCmds();
     }
-    /// Execute the robot navigation
+  }
+
+  /// - Navigation
+  if (currentMillis - previousMillisNav >= cycleTimeNav) {
+    previousMillisNav = currentMillis;
     navigation.Execute();
-    /// Execute the robot guidance
+  }
+
+  /// - Guidance
+  if (currentMillis - previousMillisGuidance >= cycleTimeGuidance) {
+    previousMillisGuidance = currentMillis;
     guidance.Execute();
-    /// Execute the robot control logic
+  }
+
+  /// - Compute motor rpms
+  if (currentMillis - previousMillisRpmCompute >= cycleTimeRpmCompute) {
+    previousMillisRpmCompute = currentMillis;
     computeMotorSpeeds(); 
+  }
+  
+  /// - Control
+  if (currentMillis - previousMillisControl >= cycleTimeControl) {
+    previousMillisControl = currentMillis;
     control.Execute();
+  }
+
+  /// - Comm Tx
+  if (currentMillis - previousMillisCommTx >= cycleTimeCommTx) {
+    /// - Save off current millis. Used for control loop timing.
+    previousMillisCommTx = currentMillis;
     /// Have C&DH prepare the robot telemetry for transmission
     cmdAndDataHandler.LoadTelemetry();
     /// - Send the telemetry over the serial port
     serialComm.Tx();
-  }
-  
+  } 
 }
 
 void computeMotorSpeeds(){
@@ -89,17 +123,15 @@ void computeMotorSpeeds(){
 }
 
 void computeRightMotorSpeed()  {                                                    
- mtrR_speed = ((mtrR_encoderCount - mtrR_encoderCountPrev)*(60*(1000/cycleTimeMillis)))/(360);          // 360 counts per output shaft rev
- float alpha = 0.3;
- mtrR_speed = (1-alpha)*mtrR_speed + alpha*mtrR_speed_prev;
+ mtrR_speed = (mtrR_encoderCount - mtrR_encoderCountPrev)*countsToRpms;
+ mtrR_speed = (1-rpmAlphaFilter)*mtrR_speed + rpmAlphaFilter*mtrR_speed_prev;
  mtrR_speed_prev = mtrR_speed;
- mtrR_encoderCountPrev = mtrR_encoderCount;                  
+ mtrR_encoderCountPrev = mtrR_encoderCount;                   
 }
 
 void computeLeftMotorSpeed()  {                                                    
- mtrL_speed = ((mtrL_encoderCount - mtrL_encoderCountPrev)*(60*(1000/cycleTimeMillis)))/(360);          // 360 counts per output shaft rev
- float alpha = 0.3;
- mtrL_speed = (1-alpha)*mtrL_speed + alpha*mtrL_speed_prev;
+ mtrL_speed = (mtrL_encoderCount - mtrL_encoderCountPrev)*countsToRpms;
+ mtrL_speed = (1-rpmAlphaFilter)*mtrL_speed + rpmAlphaFilter*mtrL_speed_prev;
  mtrL_speed_prev = mtrL_speed;
  mtrL_encoderCountPrev = mtrL_encoderCount;                  
 }

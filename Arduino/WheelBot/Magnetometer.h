@@ -6,7 +6,7 @@
 // Sensor data output interval in milliseconds
 // This may not work, if faster than 20ms (=50Hz)
 // Code is tuned for 20ms, so better leave it like that
-#define OUTPUT__DATA_INTERVAL 20  // in milliseconds
+#define OUTPUT__DATA_INTERVAL 100  // in milliseconds
 
 #define CALIBRATION__MAGN_USE_EXTENDED true
 
@@ -30,7 +30,6 @@ class Magnetometer
     void _read_mag();
     void _compensate_sensor_errors();
     void _compass_heading();
-    unsigned long timestamp;
     float magnetom[3];
     float MAG_Heading;
     

@@ -1,10 +1,9 @@
 #include "Spg30MotorDriver.h"
 
-Spg30MotorDriver::Spg30MotorDriver(uint_least8_t loopRateMillis, uint_least8_t motorPinA1,
+Spg30MotorDriver::Spg30MotorDriver(uint_least8_t motorPinA1,
                    uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long & encoderCount, int & motorSpeed) :
     ControlMode(IDLE),
     MotorSpeed(VEL_HIGH),
-    _loopRateMillis(loopRateMillis),
     _motorPinA1(motorPinA1),
     _motorPinB1(motorPinB1),
     _pwmPin(pwmPin),
@@ -18,7 +17,6 @@ Spg30MotorDriver::Spg30MotorDriver(uint_least8_t loopRateMillis, uint_least8_t m
     _driveBackward(false),
     _pwmCmd(0),
     _errorAccum(0),
-    _lastMillis(0),
     _lastMilliPrint(0),
     _Kp(5.0),
     _Ki(1.0),
@@ -69,11 +67,8 @@ void Spg30MotorDriver::run(){
 }
 
 void Spg30MotorDriver::_pidControl(){
-  	//if((millis() - _lastMillis) >= _loopRateMillis){
-	  	_lastMillis = millis();
 	  	_updatePid();
 	  	analogWrite(_pwmPin, _pwmCmd);
-	  //}
     _printMotorInfo();
 }
 

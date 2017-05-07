@@ -23,8 +23,8 @@
 class Control { 
  public:
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
-            _positionCmd(0.0), _Kp(0.0), _Kd(0.0), Mode(IDLE), 
-            _testDriveState(FWD_POS_TEST), _numSecondsInTest(0.0),
+            _positionCmd(0.0), _Kp(5.0), _Kd(0.5), _lastMilliPrint(0),
+            Mode(IDLE), _testDriveState(FWD_POS_TEST), _numSecondsInTest(0.0),
             _firstPass(true) {};
     ~Control(){};
 
@@ -44,12 +44,14 @@ class Control {
     float _positionCmd;
     float _Kp;
     float _Kd;
+    unsigned long _lastMilliPrint;
     typedef enum _ControlMode
     {
       IDLE            = 0,
       ROTATIONAL_CTRL = 1,
       DRIVING_FWD     = 2,
-      DRIVING_BWD     = 3
+      DRIVING_BWD     = 3,
+      TEST_DRIVE      = 4
     }ControlMode;
     ControlMode Mode;
 	// Moding used for a test drive
