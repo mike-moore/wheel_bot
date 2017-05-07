@@ -25,8 +25,6 @@ class RobotTerminal(Cmd):
         response = self.serialComm.commandArduino(cmd_packet)
         if response:
             print "The active waypoint is : " + response.ActiveWayPoint
-        else:
-            print " Command error"
         return
 
     def do_send_waypoint(self, args):
@@ -35,10 +33,22 @@ class RobotTerminal(Cmd):
         return
 
     def do_test_drive(self, args):
-        """Sends a sine wave control signal to the robot."""
+        """Sends a command to initiate a test drive"""
         cmd_packet = comm_packet_pb2.CommandPacket()
         test_drive_cmd = cmd_packet.RoverCmds.add()
         test_drive_cmd.Id = DO_TEST_DRIVE
+        response = self.serialComm.commandArduino(cmd_packet)
+        if response:
+            try:
+                print str(response)
+            except IndexError:
+                print " "
+
+    def do_stop_test_drive(self, args):
+        """Sends a command to stop the test drive"""
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        test_drive_stop_cmd = cmd_packet.RoverCmds.add()
+        test_drive_stop_cmd.Id = STOP_TEST_DRIVE
         response = self.serialComm.commandArduino(cmd_packet)
         if response:
             try:
