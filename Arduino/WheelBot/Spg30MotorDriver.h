@@ -16,11 +16,23 @@
 
 #include <Arduino.h>
 
+#define MTR_DEADBAND_LOW 125
+static const int _pwmLookup[30] =
+{
+    MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW,
+    MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW,
+    MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW,
+    130, 135, 140, 145, 150,
+    160, 165, 170, 180, 190,
+    200, 210, 220, 230, 240,
+}; 
+
 class Spg30MotorDriver { 
  public:
   /// @brief Construct the driver by providing all Arduino pin assignments
   Spg30MotorDriver(uint_least8_t loopRateMillis, uint_least8_t motorPinA1, 
-  	               uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long int& encoderCount);
+  	               uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long int& encoderCount,
+  	               int & motorSpeed);
 
   /// @brief Defines this motor driver's modes of operation.
   enum ControlModes
@@ -55,9 +67,7 @@ class Spg30MotorDriver {
   /// @brief Functions the user can call to see if their commanded
   ///        position and velocity have been reached.
   bool ReachedPosition();
-  bool ReachedVelocity();
  private:
-  void _computeMotorSpeed();
   void _pidControl();
   void _updatePid();
   void _positionControl();
@@ -70,8 +80,8 @@ class Spg30MotorDriver {
   uint_least8_t _motorPinA1;
   uint_least8_t _motorPinB1;
   uint_least8_t _pwmPin;
-  uint_least8_t _encoderCountsPerRev;
   volatile long & _encoderCount;
+  int & _measuredSpeed;
   long _countInit;
   long _tickNumber;
   int _velocityCmd;
@@ -79,30 +89,22 @@ class Spg30MotorDriver {
   bool _driveForward; 
   bool _driveBackward; 
   uint_least8_t _pwmCmd;
-  int _measuredSpeed;
+  int _errorAccum;
   unsigned long _lastMillis;
   unsigned long _lastMilliPrint;
   float _Kp;
-  float _Kd;
+  float _Ki;
   bool _motorIsRunning; 
-  bool _positionReached; 
-  bool _velocityReached; 
+  bool _positionReached;
 };
 
 inline bool Spg30MotorDriver::ReachedPosition(){
 	return _positionReached;
 }
 
-inline bool Spg30MotorDriver::ReachedVelocity(){
-  return _velocityReached;
-}
-
 inline void Spg30MotorDriver::VelocityCmd(int velocityCmd){
-	// TODO constrain to +- 35 RPM
-  if(_velocityReached && velocityCmd != _velocityCmd){
-      _velocityCmd = velocityCmd;
-      _velocityReached = false;
-  }
+  _velocityCmd = constrain(velocityCmd, -30, 30);  
+  ControlMode = VELOCITY;
 }
 
 inline void Spg30MotorDriver::FwdPositionCmd(uint16_t positionCmd){

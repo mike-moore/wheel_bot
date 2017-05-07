@@ -35,8 +35,8 @@ enum LeftMotorPinAssignments {
 extern const long cycleTimeMillis;
 extern volatile long int mtrR_encoderCount;
 extern volatile long int mtrL_encoderCount;
-
-
+extern int mtrR_speed;
+extern int mtrL_speed;
 ///////////////////////////////////////////////////////////////
 /// @class RobotEffectors
 /// @ingroup WheelBot

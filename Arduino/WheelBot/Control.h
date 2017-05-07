@@ -22,25 +22,47 @@
 ///////////////////////////////////////////////////////////////
 class Control { 
  public:
-    Control(RobotState& state) : State(state), ControlWaitCycles(0), numSecondsInTest(0.0), firstPass(true) {};
+    Control(RobotState& state) : State(state), _velocityCmd(0.0), 
+            _positionCmd(0.0), _Kp(0.0), _Kd(0.0), Mode(IDLE), 
+            _testDriveState(FWD_POS_TEST), _numSecondsInTest(0.0),
+            _firstPass(true) {};
     ~Control(){};
 
     void Execute();
 
  private:
-    void testDrive();
+
+    bool _headingError();
+    void _checkForDistanceControl();
+    bool _distanceError();
+    void _printHeadingDebug();
+    void _printDistanceDebug();
+    void _performRotationControl();
+    void _testDrive();
     RobotState& State;
-    uint32_t ControlWaitCycles;
+    float _velocityCmd;
+    float _positionCmd;
+    float _Kp;
+    float _Kd;
+    typedef enum _ControlMode
+    {
+      IDLE            = 0,
+      ROTATIONAL_CTRL = 1,
+      DRIVING_FWD     = 2,
+      DRIVING_BWD     = 3
+    }ControlMode;
+    ControlMode Mode;
 	// Moding used for a test drive
 	enum TestDriveRoute
 	{
 	    FWD_POS_TEST = 0,
 	    BWD_POS_TEST = 1,
-	    VEL_TEST = 2
+	    SPEED_UP_VEL_TEST = 2,
+      SLOW_DOWN_VEL_TEST = 3     
 	};
-    TestDriveRoute TestDriveState;
-    float numSecondsInTest;
-    bool firstPass;
+    TestDriveRoute _testDriveState;
+    float _numSecondsInTest;
+    bool _firstPass;
 };
   
 

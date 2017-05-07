@@ -1,16 +1,13 @@
 #include "Navigation.h"
 
 void Navigation::InitSensors() {
-
+    State.sensors.magnetometer.Init();
 }
 
 void Navigation::Execute() {
-
-
-    /// - TODO Get data from sensors here. Perform any filtering prior
-    ///   to sending it on for Guidance.
-    State.SensedHeading = 1.0;
+    State.SensedHeading = State.sensors.magnetometer.ReadHeading();
     State.SensedDistance = 2.0;
-
+    Serial.print("Sensed heading : ");
+    Serial.println(State.SensedHeading);
 }
 

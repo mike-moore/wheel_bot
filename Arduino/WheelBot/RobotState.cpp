@@ -8,7 +8,9 @@ RobotState::RobotState()
  ActiveWayPoint(),
  WayPointQueue(),
  HeadingError(0.0),
+ HeadingErrorTol(2.0),
  DistanceError(0.0),
+ DistanceErrorTol(0.25),
  ControlSignal(0.0),
  TargetReached(true)
 {

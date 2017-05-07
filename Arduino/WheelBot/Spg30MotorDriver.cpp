@@ -1,15 +1,15 @@
 #include "Spg30MotorDriver.h"
 
 Spg30MotorDriver::Spg30MotorDriver(uint_least8_t loopRateMillis, uint_least8_t motorPinA1,
-                   uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long & encoderCount) :
+                   uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long & encoderCount, int & motorSpeed) :
     ControlMode(IDLE),
     MotorSpeed(VEL_HIGH),
     _loopRateMillis(loopRateMillis),
     _motorPinA1(motorPinA1),
     _motorPinB1(motorPinB1),
     _pwmPin(pwmPin),
-    _encoderCountsPerRev(360),
     _encoderCount(encoderCount),
+    _measuredSpeed(motorSpeed),
     _countInit(0),
     _tickNumber(0),
     _velocityCmd(0),
@@ -17,15 +17,15 @@ Spg30MotorDriver::Spg30MotorDriver(uint_least8_t loopRateMillis, uint_least8_t m
     _driveForward(false),
     _driveBackward(false),
     _pwmCmd(0),
-    _measuredSpeed(0),
+    _errorAccum(0),
     _lastMillis(0),
     _lastMilliPrint(0),
-    _Kp(0.4),
-    _Kd(1.0),
+    _Kp(5.0),
+    _Ki(1.0),
     _motorIsRunning(false),
-    _positionReached(true),
-    _velocityReached(true)
+    _positionReached(true)
 {
+   _measuredSpeed = 0;
     /// - Initialize the Arduino pins for motor control and encoder readings.
     pinMode(_motorPinA1, OUTPUT);
     pinMode(_motorPinB1, OUTPUT);
@@ -68,26 +68,18 @@ void Spg30MotorDriver::run(){
     }
 }
 
-void Spg30MotorDriver::_computeMotorSpeed(){
-  	static long lastCount = 0;
-  	_measuredSpeed = ((_encoderCount - lastCount)*(60*(1000/_loopRateMillis)))/_encoderCountsPerRev;
-  	lastCount = _encoderCount;
-}
-
 void Spg30MotorDriver::_pidControl(){
-  	if((millis() - _lastMillis) >= _loopRateMillis){
+  	//if((millis() - _lastMillis) >= _loopRateMillis){
 	  	_lastMillis = millis();
-	  	_computeMotorSpeed();
 	  	_updatePid();
 	  	analogWrite(_pwmPin, _pwmCmd);
-	  }
+	  //}
     _printMotorInfo();
 }
 
 void Spg30MotorDriver::_updatePid(){
     float pidTerm = 0;
     int error=0;                                  
-	  static int last_error=0;          
 	  if (_velocityCmd < 0.0){
 	     	digitalWrite(_motorPinA1, HIGH);
 	     	digitalWrite(_motorPinB1, LOW);                  
@@ -96,9 +88,11 @@ void Spg30MotorDriver::_updatePid(){
 	     	digitalWrite(_motorPinB1, HIGH);    
 	  }
 	  error = abs(_velocityCmd) - abs(_measuredSpeed); 
-	  pidTerm = (_Kp * error) + (_Kd * (error - last_error));                            
-    last_error = error;
-	  _pwmCmd = constrain(_pwmCmd + int(pidTerm), 0, 255);
+    error = constrain(error, -10, 10);
+    _errorAccum = constrain(_errorAccum, -150, 150);
+	  pidTerm = _pwmLookup[abs(_velocityCmd)] + (_Kp * error) + (_Ki * _errorAccum);                            
+    _errorAccum += error;
+	  _pwmCmd = constrain(int(pidTerm), MTR_DEADBAND_LOW, 255);
 }
 
 void Spg30MotorDriver::_positionControl(){
@@ -134,6 +128,7 @@ void Spg30MotorDriver::_motorBrake(){
 void Spg30MotorDriver::_printMotorInfo(){  
   if((millis()-_lastMilliPrint) >= 500){                     
         _lastMilliPrint = millis();
+        Serial.print("Error Accum:");             Serial.println(_errorAccum);  
         Serial.print("SP:");             Serial.println(_velocityCmd);  
         Serial.print("  RPM:");          Serial.println(_measuredSpeed);
         Serial.print("  PWM:");          Serial.println(_pwmCmd);
