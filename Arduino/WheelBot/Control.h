@@ -26,6 +26,7 @@ class Control {
             _positionCmd(0.0), _Kp(5.0), _Kd(0.5), _lastMilliPrint(0),
             Mode(IDLE), _testDriveState(FWD_POS_TEST), _numSecondsInTest(0.0),
             _firstPass(true) {};
+
     ~Control(){};
 
     void Execute();
@@ -58,7 +59,7 @@ class Control {
 	enum TestDriveRoute
 	{
 	    FWD_POS_TEST = 0,
-	    BWD_POS_TEST = 1,
+	    TurnR_POS_TEST = 1,
 	    SPEED_UP_VEL_TEST = 2,
       SLOW_DOWN_VEL_TEST = 3     
 	};

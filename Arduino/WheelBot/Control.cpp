@@ -5,36 +5,36 @@ void Control::Execute() {
     {
         case IDLE:
             //_checkForDistanceControl();
-            if (_headingError()){
-                Mode = ROTATIONAL_CTRL;
-            }
+            //if (_headingError()){
+            //    Mode = ROTATIONAL_CTRL;
+            //}
             if (State.DoTestDrive){
                 Mode = TEST_DRIVE;
             }
         break;
 
         case ROTATIONAL_CTRL:
-            _performRotationControl();
+            //_performRotationControl();
             //_printHeadingDebug();
-            if (!_headingError()){
+            //if (!_headingError()){
                 Mode = IDLE;
-                _velocityCmd = 0.0;
-            }
-            State.effectors.rightMotor.VelocityCmd(_velocityCmd); 
-            State.effectors.leftMotor.VelocityCmd(-_velocityCmd); 
-            State.effectors.rightMotor.run();
-            State.effectors.leftMotor.run();
+           //     _velocityCmd = 0.0;
+           // }
+            // State.effectors.rightMotor.VelocityCmd(_velocityCmd); 
+            // State.effectors.leftMotor.VelocityCmd(-_velocityCmd); 
+            // State.effectors.rightMotor.run();
+            // State.effectors.leftMotor.run();
         break;
 
         case DRIVING_FWD:
-            _positionCmd = 0.0;
-            State.TargetReached = true;
+            //_positionCmd = 0.0;
+            //State.TargetReached = true;
             Mode = IDLE;
         break;
 
         case DRIVING_BWD:
-            _positionCmd = 0.0;
-            State.TargetReached = true;
+            //_positionCmd = 0.0;
+            //State.TargetReached = true;
             Mode = IDLE;
         break;
         
@@ -42,6 +42,8 @@ void Control::Execute() {
             _testDrive();
             if (!State.DoTestDrive){
                 Mode = IDLE;
+                State.effectors.rightMotor.MotorBrake();
+                State.effectors.leftMotor.MotorBrake();
                 _testDriveState = FWD_POS_TEST;
             }
 
@@ -123,16 +125,16 @@ void Control::_testDrive(){
                 State.effectors.rightMotor.ReachedPosition()) {
                 Serial.println("FWD POSITION TEST COMPLETE");
                 _firstPass = true;
-                _testDriveState = BWD_POS_TEST;
+                _testDriveState = TurnR_POS_TEST;
             }
 
         break;
 
-        case BWD_POS_TEST:
+        case TurnR_POS_TEST:
             if(_firstPass){
-                Serial.println("BWD POSITION TEST STARTING");
-                State.effectors.rightMotor.BwdPositionCmd(720); 
-                State.effectors.leftMotor.BwdPositionCmd(720); 
+                Serial.println("RIGHT TURN POSITION TEST STARTING");
+                State.effectors.rightMotor.BwdPositionCmd(305); 
+                State.effectors.leftMotor.FwdPositionCmd(305); 
                 _firstPass=false;
             }
             /// - Keep running the controller until it's put back in to the IDLE
@@ -142,10 +144,11 @@ void Control::_testDrive(){
 
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
-                Serial.println("BWD POSITION TEST COMPLETE");
-                Serial.println("SPEED UP VELOCITY TEST STARTING");
+                Serial.println("RIGHT TURN POSITION TEST COMPLETE");
+                //Serial.println("SPEED UP VELOCITY TEST STARTING");
                 _firstPass = true;
-                _testDriveState = SPEED_UP_VEL_TEST;
+                //_testDriveState = SPEED_UP_VEL_TEST;
+                _testDriveState = FWD_POS_TEST;
             }
 
         break;
@@ -195,6 +198,7 @@ void Control::_testDrive(){
                 State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
                 Serial.println("SLOW DOWN VELOCITY TEST COMPLETE");
                 State.TargetReached = true;
+                _testDriveState = FWD_POS_TEST;
                 _numSecondsInTest = 0.0;
             }
         break;     

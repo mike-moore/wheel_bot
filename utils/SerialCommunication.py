@@ -11,6 +11,7 @@ class SerialCommunication(object):
         self.resetPacketCounters()
     	self.cmdFooter = "SOE!"
     	self.CommFrequency = frequency
+        self.MaxPacketFails = 20
         if self.serialPort.isOpen():
             logging.info('Serial communication running on port : ' + portName)
             self.serialPort.flushInput()
@@ -22,27 +23,40 @@ class SerialCommunication(object):
         self.serialPort.write(cmd_and_footer)
 
     def commandArduino(self, cmd):
+        self.Tx_commandArduino(cmd)
+
+        # Give the Arduino time to respond.
+        time.sleep(self.CommFrequency)
+
+        self.Rx_commandArduino(cmd)
+
+    def Tx_commandArduino(self, cmd):
         if (isinstance(cmd, comm_packet_pb2.CommandPacket)):
             # Send down the serialized command
             try:
                 self.sendCommand(cmd.SerializeToString())
             except EncodeError:
-            	logging.error("Failed to encode command packet. Are all required fields set?")
-            	raise IOError
+                logging.error("Failed to encode command packet. Are all required fields set?")
+                raise IOError
 
-            # Give the Arduino time to respond.
-            time.sleep(self.CommFrequency)
-
-            # Unpack the received Arduino packet.
+    def Rx_commandArduino(self, cmd):
+        # Unpack the received Arduino packet.
             try:
                 response = self.readTelemetry()
                 self.NumReceivedPackets += 1
                 return response
             except IOError:
                 self.NumFailedPackets += 1
-                return None
-        else:
-            raise TypeError
+                if (self.NumFailedPackets <= self.MaxPacketFails):
+                    self.serialPort.flushInput()
+                    self.serialPort.flushOutput()
+                    time.sleep(self.CommFrequency)
+                    self.Tx_commandArduino(cmd)
+                else:
+                    self.NumFailedPackets = 0
+                    raise IOError
+            else:
+                raise TypeError
 
     def readTelemetry(self):
         bytes_rcvd = self.readRawBytes()

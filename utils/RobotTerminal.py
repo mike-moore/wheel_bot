@@ -6,6 +6,7 @@ from cmd import Cmd
 from time import sleep
 import numpy as np
 
+
 class RobotTerminal(Cmd):
 
     def __init__(self):
@@ -22,7 +23,7 @@ class RobotTerminal(Cmd):
         cmd_packet = comm_packet_pb2.CommandPacket()
         active_waypt_cmd = cmd_packet.RoverCmds.add()
         active_waypt_cmd.Id = WP_GET_ACTIVE
-        response = self.serialComm.commandArduino(cmd_packet)
+        response = self.arduino_send_command(cmd_packet)
         if response:
             print "The active waypoint is : " + response.ActiveWayPoint
         return
@@ -37,24 +38,23 @@ class RobotTerminal(Cmd):
         cmd_packet = comm_packet_pb2.CommandPacket()
         test_drive_cmd = cmd_packet.RoverCmds.add()
         test_drive_cmd.Id = DO_TEST_DRIVE
-        response = self.serialComm.commandArduino(cmd_packet)
-        if response:
-            try:
-                print str(response)
-            except IndexError:
-                print " "
+        self.arduino_send_command(cmd_packet)
 
     def do_stop_test_drive(self, args):
         """Sends a command to stop the test drive"""
         cmd_packet = comm_packet_pb2.CommandPacket()
         test_drive_stop_cmd = cmd_packet.RoverCmds.add()
         test_drive_stop_cmd.Id = STOP_TEST_DRIVE
-        response = self.serialComm.commandArduino(cmd_packet)
-        if response:
-            try:
-                print str(response)
-            except IndexError:
-                print " "
+        self.arduino_send_command(cmd_packet)
+
+    def arduino_send_command(self, cmd):
+        try:
+            response = self.serialComm.commandArduino(cmd)
+            print str(response)
+            return response
+        except (TypeError, IOError):
+            print " Communication error, check connections."  
+            return None
 
     def send_waypoint(self):
         try:
@@ -71,7 +71,7 @@ class RobotTerminal(Cmd):
         way_point_cmd.WayPointCmd.Name = way_point_name
         way_point_cmd.WayPointCmd.Heading = way_point_heading
         way_point_cmd.WayPointCmd.Distance = way_point_distance
-        response = self.serialComm.commandArduino(way_point_cmd)
+        response = self.arduino_send_command(way_point_cmd)
         if self.isValidWayPoint(response):
             print "WayPoint " + way_point_name + " successfully sent and processed."
         else:

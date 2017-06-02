@@ -42,7 +42,7 @@ class UtSerialCommunication(unittest.TestCase):
     def test_sendNoNameWayPointCmd(self):
         logging.info("Sending no name way point command")
         cmd_packet = comm_packet_pb2.CommandPacket()
-        cmd_packet.WayPointCmd.Heading = 45
+        cmd_packet.WayPointCmd.Heading = 45.0
         cmd_packet.WayPointCmd.Distance = 0.5
         self.assertRaises(IOError, self.testArticle.commandArduino, cmd_packet)
 
@@ -85,7 +85,7 @@ class UtSerialCommunication(unittest.TestCase):
          control_signal_cmd.Id = WP_GET_ACTIVE
          response = self.helper_SendOneCmdPacket(cmd_packet)
          self.helper_checkResponse(response)
-         logging.info("The active waypoint is : " + response.ActiveWayPoint)
+         #logging.info("The active waypoint is : " + response.ActiveWayPoint)
 
     def test_commandTestDrive(self):
         logging.info("Sending test drive command")
