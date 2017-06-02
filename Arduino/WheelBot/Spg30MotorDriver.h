@@ -63,6 +63,7 @@ class Spg30MotorDriver {
   /// @brief Motor control command functions
   void FwdPositionCmd(uint16_t positionCmd);
   void BwdPositionCmd(uint16_t positionCmd);
+  void MotorBrake();  
   void VelocityCmd(int velocityCmd);
   /// @brief Functions the user can call to see if their commanded
   ///        position and velocity have been reached.
@@ -119,6 +120,11 @@ inline void Spg30MotorDriver::BwdPositionCmd(uint16_t positionCmd){
   _cmdPosition(positionCmd);
   Serial.print("Accepting bwd position command (deg) : ");
   Serial.println(positionCmd);
+}
+
+inline void Spg30MotorDriver::MotorBrake(){
+  ControlMode = IDLE;
+  run();
 }
 
 // - Logic here checks that we have a non-zero position command,
