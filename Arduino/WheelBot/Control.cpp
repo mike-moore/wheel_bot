@@ -125,12 +125,12 @@ void Control::_testDrive(){
                 State.effectors.rightMotor.ReachedPosition()) {
                 Serial.println("FWD POSITION TEST COMPLETE");
                 _firstPass = true;
-                _testDriveState = TurnR_POS_TEST;
+                _testDriveState = TURN_RIGHT_TEST;
             }
 
         break;
 
-        case TurnR_POS_TEST:
+        case TURN_RIGHT_TEST:
             if(_firstPass){
                 Serial.println("RIGHT TURN POSITION TEST STARTING");
                 State.effectors.rightMotor.BwdPositionCmd(305); 

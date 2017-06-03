@@ -8,7 +8,7 @@ class SerialCommunication(object):
     def __init__(self, portName, frequency=0.1):
         self.serialPort = serial.Serial(
             port=portName, baudrate=57600, rtscts=True, dsrdtr=True)
-        self.resetPacketCounters()
+        self.NumFailedPackets = 0
     	self.cmdFooter = "SOE!"
     	self.CommFrequency = frequency
         self.MaxPacketFails = 20
@@ -23,14 +23,31 @@ class SerialCommunication(object):
         self.serialPort.write(cmd_and_footer)
 
     def commandArduino(self, cmd):
-        self.Tx_commandArduino(cmd)
+        # Initialize response packet to none
+        response = None
+        # Keep attempting to command the arduino until we get a response
+        # or fail more packets than max packet fails
+        while(not response and self.NumFailedPackets <= self.MaxPacketFails):
+            # Tx cmds
+            self.tx(cmd)
+            # Give the Arduino time to respond.
+            time.sleep(self.CommFrequency)
+            # Rx telemetry
+            try:
+                response = self.readTelemetry()
+            except IOError:
+                logging.error("Failed to send single packet :" + str(cmd))
+                self.serialPort.flushInput()
+                self.serialPort.flushOutput()
+                self.NumFailedPackets += 1
+        if not response:
+            logging.error("Failed to send " + str(self.MaxPacketFails) + " command packets in a row. Check connections.")
+            # reset packet fail counter
+            self.NumFailedPackets = 0
+            raise IOError
+        return response
 
-        # Give the Arduino time to respond.
-        time.sleep(self.CommFrequency)
-
-        self.Rx_commandArduino(cmd)
-
-    def Tx_commandArduino(self, cmd):
+    def tx(self, cmd):
         if (isinstance(cmd, comm_packet_pb2.CommandPacket)):
             # Send down the serialized command
             try:
@@ -38,25 +55,6 @@ class SerialCommunication(object):
             except EncodeError:
                 logging.error("Failed to encode command packet. Are all required fields set?")
                 raise IOError
-
-    def Rx_commandArduino(self, cmd):
-        # Unpack the received Arduino packet.
-            try:
-                response = self.readTelemetry()
-                self.NumReceivedPackets += 1
-                return response
-            except IOError:
-                self.NumFailedPackets += 1
-                if (self.NumFailedPackets <= self.MaxPacketFails):
-                    self.serialPort.flushInput()
-                    self.serialPort.flushOutput()
-                    time.sleep(self.CommFrequency)
-                    self.Tx_commandArduino(cmd)
-                else:
-                    self.NumFailedPackets = 0
-                    raise IOError
-            else:
-                raise TypeError
 
     def readTelemetry(self):
         bytes_rcvd = self.readRawBytes()
@@ -81,6 +79,3 @@ class SerialCommunication(object):
             raise IOError
         return wb_tlm
 
-    def resetPacketCounters(self):
-        self.NumFailedPackets = 0
-        self.NumReceivedPackets = 0

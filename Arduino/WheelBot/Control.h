@@ -59,7 +59,7 @@ class Control {
 	enum TestDriveRoute
 	{
 	    FWD_POS_TEST = 0,
-	    TurnR_POS_TEST = 1,
+	    TURN_RIGHT_TEST = 1,
 	    SPEED_UP_VEL_TEST = 2,
       SLOW_DOWN_VEL_TEST = 3     
 	};
