@@ -36,7 +36,7 @@ class SerialCommunication(object):
             try:
                 response = self.readTelemetry()
             except IOError:
-                logging.error("Failed to send single packet :" + str(cmd))
+                logging.info("Failed to send single packet :" + str(cmd))
                 self.serialPort.flushInput()
                 self.serialPort.flushOutput()
                 self.NumFailedPackets += 1
