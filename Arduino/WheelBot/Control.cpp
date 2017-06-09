@@ -37,8 +37,9 @@ void Control::Execute() {
                 State.effectors.rightMotor.ReachedPosition()) {
                 Serial.println("DISTANCE ERROR CLOSED OUT...STOPPING");
                 State.TargetReached = true;
+                Mode = IDLE;
             }
-            Mode = IDLE;
+
         break;
         
         case TEST_DRIVE:
@@ -66,12 +67,12 @@ void Control::_checkForDistanceControl(){
    if (_distanceError()){
         uint16_t pos_cmd = 0;
         if(State.DistanceError > 0.0){
-            pos_cmd = State.DistanceError*720; 
+            pos_cmd = abs(State.DistanceError)*MotorRotDegPerFt; 
             State.effectors.rightMotor.FwdPositionCmd(pos_cmd); 
             State.effectors.leftMotor.FwdPositionCmd(pos_cmd); 
             Mode = TRANSLATIONAL_CTRL;
         }else{
-            pos_cmd = State.DistanceError*720; 
+            pos_cmd = abs(State.DistanceError)*MotorRotDegPerFt; 
             State.effectors.rightMotor.BwdPositionCmd(pos_cmd); 
             State.effectors.leftMotor.BwdPositionCmd(pos_cmd); 
             Mode = TRANSLATIONAL_CTRL;
