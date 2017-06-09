@@ -52,11 +52,9 @@ void setup(){
   // - Serial comm init
   serialComm.InitHw();
   // - Init sensors
-  //navigation.InitSensors();
+  navigation.InitSensors();
   // - Very Important: attach interrupt service routines for motor encoders
   setup_encoders();
-  //robotState.DoTestDrive = true;
-  
 }
 
 void setup_encoders(){
@@ -73,9 +71,8 @@ void setup_encoders(){
 void loop(){
   unsigned long currentMillis = millis();
   // Disable all interrupts for Communication System; time sensitive
-  //noInterrupts();
   /// - Comm Rx
-   if (currentMillis - previousMillisCommRx >= cycleTimeCommRx) {
+  if (currentMillis - previousMillisCommRx >= cycleTimeCommRx) {
     previousMillisCommRx = currentMillis;
     //Serial.println("Success!");
     /// - Read commands from the serial port.
@@ -87,9 +84,8 @@ void loop(){
   }
   
   // Enable all interrupts 
-  //interrupts();
   /// - Navigation
-  /*if (currentMillis - previousMillisNav >= cycleTimeNav) {
+  if (currentMillis - previousMillisNav >= cycleTimeNav) {
     previousMillisNav = currentMillis;
     navigation.Execute();
   }
@@ -98,7 +94,7 @@ void loop(){
   if (currentMillis - previousMillisGuidance >= cycleTimeGuidance) {
     previousMillisGuidance = currentMillis;
     guidance.Execute();
-  }*/
+  }
 
   /// - Compute motor rpms
   if (currentMillis - previousMillisRpmCompute >= cycleTimeRpmCompute) {

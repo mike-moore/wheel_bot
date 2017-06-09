@@ -48,11 +48,10 @@ class Control {
     unsigned long _lastMilliPrint;
     typedef enum _ControlMode
     {
-      IDLE            = 0,
-      ROTATIONAL_CTRL = 1,
-      DRIVING_FWD     = 2,
-      DRIVING_BWD     = 3,
-      TEST_DRIVE      = 4
+      IDLE                = 0,
+      ROTATIONAL_CTRL     = 1,
+      TRANSLATIONAL_CTRL  = 2,
+      TEST_DRIVE          = 4
     }ControlMode;
     ControlMode Mode;
 	// Moding used for a test drive

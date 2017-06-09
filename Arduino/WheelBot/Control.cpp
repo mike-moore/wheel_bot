@@ -4,10 +4,13 @@ void Control::Execute() {
     switch(Mode)
     {
         case IDLE:
-            //_checkForDistanceControl();
-            //if (_headingError()){
-            //    Mode = ROTATIONAL_CTRL;
-            //}
+            // - Keep motors braked in idle mode.
+            State.effectors.rightMotor.MotorBrake();
+            State.effectors.leftMotor.MotorBrake();
+            // - Check for an active distance error
+            _checkForDistanceControl();
+            // - Monitor for test drive command. 
+            //   Initiates open loop sequence.
             if (State.DoTestDrive){
                 Mode = TEST_DRIVE;
             }
@@ -16,25 +19,25 @@ void Control::Execute() {
         case ROTATIONAL_CTRL:
             //_performRotationControl();
             //_printHeadingDebug();
-            //if (!_headingError()){
+            if (!_headingError()){
                 Mode = IDLE;
-           //     _velocityCmd = 0.0;
-           // }
+                _velocityCmd = 0.0;
+            }
             // State.effectors.rightMotor.VelocityCmd(_velocityCmd); 
             // State.effectors.leftMotor.VelocityCmd(-_velocityCmd); 
             // State.effectors.rightMotor.run();
             // State.effectors.leftMotor.run();
         break;
 
-        case DRIVING_FWD:
-            //_positionCmd = 0.0;
-            //State.TargetReached = true;
-            Mode = IDLE;
-        break;
+        case TRANSLATIONAL_CTRL:
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
 
-        case DRIVING_BWD:
-            //_positionCmd = 0.0;
-            //State.TargetReached = true;
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition()) {
+                Serial.println("DISTANCE ERROR CLOSED OUT...STOPPING");
+                State.TargetReached = true;
+            }
             Mode = IDLE;
         break;
         
@@ -42,8 +45,6 @@ void Control::Execute() {
             _testDrive();
             if (!State.DoTestDrive){
                 Mode = IDLE;
-                State.effectors.rightMotor.MotorBrake();
-                State.effectors.leftMotor.MotorBrake();
                 _testDriveState = FWD_POS_TEST;
             }
 
@@ -63,10 +64,17 @@ bool Control::_headingError(){
 
 void Control::_checkForDistanceControl(){
    if (_distanceError()){
+        uint16_t pos_cmd = 0;
         if(State.DistanceError > 0.0){
-            Mode = DRIVING_FWD;
+            pos_cmd = State.DistanceError*720; 
+            State.effectors.rightMotor.FwdPositionCmd(pos_cmd); 
+            State.effectors.leftMotor.FwdPositionCmd(pos_cmd); 
+            Mode = TRANSLATIONAL_CTRL;
         }else{
-            Mode = DRIVING_BWD;
+            pos_cmd = State.DistanceError*720; 
+            State.effectors.rightMotor.BwdPositionCmd(pos_cmd); 
+            State.effectors.leftMotor.BwdPositionCmd(pos_cmd); 
+            Mode = TRANSLATIONAL_CTRL;
         }
     }
 }

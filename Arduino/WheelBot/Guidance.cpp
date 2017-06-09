@@ -26,8 +26,8 @@ void Guidance::Execute() {
 
         case TRACKING:
             /// - Compute the errors for control
-            State.HeadingError = State.ActiveWayPoint.Heading - State.SensedHeading;
-            State.DistanceError = State.ActiveWayPoint.Distance - State.SensedDistance;
+            State.HeadingError = 0.0; // State.ActiveWayPoint.Heading - State.SensedHeading;
+            State.DistanceError = State.ActiveWayPoint.Distance; //- State.SensedDistance;
             if (State.TargetReached){
                 Mode = IDLE;
             }
