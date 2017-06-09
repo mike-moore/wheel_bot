@@ -12,7 +12,8 @@ RobotState::RobotState()
  DistanceError(0.0),
  DistanceErrorTol(0.25),
  ControlSignal(0.0),
- TargetReached(true)
+ HeadingReached(true),
+ DistanceReached(true)
 {
 	strncpy(ActiveWayPoint.Name,"StartWayPoint", 15);
 	ActiveWayPoint.Heading = 0.0;

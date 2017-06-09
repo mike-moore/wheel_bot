@@ -19,16 +19,15 @@ void Guidance::Execute() {
                 State.ActiveWayPoint.Distance = way_point.Distance; 
                 Serial.print("Tracking to new waypoint : ");
                 Serial.println(State.ActiveWayPoint.Name);
-                State.TargetReached = false;
+                /// - Compute the errors for control
+                State.HeadingError =  State.ActiveWayPoint.Heading; //- State.SensedHeading;
+                State.DistanceError = State.ActiveWayPoint.Distance; //- State.SensedDistance;
                 Mode = TRACKING;
             }
         break;
 
         case TRACKING:
-            /// - Compute the errors for control
-            State.HeadingError = 0.0; // State.ActiveWayPoint.Heading - State.SensedHeading;
-            State.DistanceError = State.ActiveWayPoint.Distance; //- State.SensedDistance;
-            if (State.TargetReached){
+            if (State.HeadingReached and State.DistanceReached){
                 Mode = IDLE;
             }
         break;

@@ -7,6 +7,8 @@ void Control::Execute() {
             // - Keep motors braked in idle mode.
             State.effectors.rightMotor.MotorBrake();
             State.effectors.leftMotor.MotorBrake();
+            // - Check for an active heading error
+            _checkForHeadingControl();
             // - Check for an active distance error
             _checkForDistanceControl();
             // - Monitor for test drive command. 
@@ -17,26 +19,23 @@ void Control::Execute() {
         break;
 
         case ROTATIONAL_CTRL:
-            //_performRotationControl();
-            //_printHeadingDebug();
-            if (!_headingError()){
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition()) {
+                State.HeadingReached = true;
+                State.HeadingError = 0.0;
                 Mode = IDLE;
-                _velocityCmd = 0.0;
             }
-            // State.effectors.rightMotor.VelocityCmd(_velocityCmd); 
-            // State.effectors.leftMotor.VelocityCmd(-_velocityCmd); 
-            // State.effectors.rightMotor.run();
-            // State.effectors.leftMotor.run();
         break;
 
         case TRANSLATIONAL_CTRL:
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
-
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
-                Serial.println("DISTANCE ERROR CLOSED OUT...STOPPING");
-                State.TargetReached = true;
+                State.DistanceReached = true;
+                State.DistanceError = 0.0;
                 Mode = IDLE;
             }
 
@@ -61,6 +60,26 @@ void Control::Execute() {
 
 bool Control::_headingError(){
     return (abs(State.HeadingError) > abs(State.HeadingErrorTol));
+}
+
+void Control::_checkForHeadingControl(){
+    if (_headingError()){
+        uint16_t pos_cmd = 0;
+        if(State.HeadingError > 0.0){
+            pos_cmd = abs(State.HeadingError)*MotorRotDegPerDegHeading; 
+            State.effectors.rightMotor.FwdPositionCmd(pos_cmd); 
+            State.effectors.leftMotor.BwdPositionCmd(pos_cmd); 
+            Mode = ROTATIONAL_CTRL;
+        }else{
+            pos_cmd = abs(State.HeadingError)*MotorRotDegPerDegHeading; 
+            State.effectors.rightMotor.BwdPositionCmd(pos_cmd); 
+            State.effectors.leftMotor.FwdPositionCmd(pos_cmd); 
+            Mode = ROTATIONAL_CTRL;
+        }
+    }else{
+        State.HeadingReached = true;
+        State.DistanceReached = true;
+    }
 }
 
 void Control::_checkForDistanceControl(){
