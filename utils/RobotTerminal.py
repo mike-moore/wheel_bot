@@ -4,8 +4,7 @@ from CmdResponseDefinitions import *
 import comm_packet_pb2
 from cmd import Cmd
 from time import sleep
-import numpy as np
-
+import csv
 
 class RobotTerminal(Cmd):
 
@@ -71,17 +70,8 @@ class RobotTerminal(Cmd):
         way_point_cmd.WayPointCmd.Name = way_point_name
         way_point_cmd.WayPointCmd.Heading = way_point_heading
         way_point_cmd.WayPointCmd.Distance = way_point_distance
-        response = self.arduino_send_command(way_point_cmd)
-        if self.isValidWayPoint(response):
-            print "WayPoint " + way_point_name + " successfully sent and processed."
-        else:
-            print "WayPoint " + way_point_name + " command was rejected."
+        self.arduino_send_command(way_point_cmd)
 
-    def isValidWayPoint(self, response):
-        if response:
-            if response.RoverStatus[0].Id == WP_CMD_ACCEPT:
-                return True
-        return False
 
 if __name__ == '__main__':
     prompt = RobotTerminal()
