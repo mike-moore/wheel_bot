@@ -23,7 +23,7 @@
 class Control { 
  public:
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
-            _positionCmd(0.0), _Kp(5.0), _Kd(0.5), _lastMilliPrint(0),
+            _positionCmd(0.0), _Kp(5.0), _Kd(0.5), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
             Mode(IDLE), _testDriveState(FWD_POS_TEST), _numSecondsInTest(0.0),
             _firstPass(true) {};
 
@@ -35,6 +35,7 @@ class Control {
 
     bool _headingError();
     void _checkForDistanceControl();
+    void _checkForHeadingControl();
     bool _distanceError();
     void _printHeadingDebug();
     void _printDistanceDebug();
@@ -45,6 +46,8 @@ class Control {
     float _positionCmd;
     float _Kp;
     float _Kd;
+    uint16_t MotorRotDegPerFt;
+    float MotorRotDegPerDegHeading;
     unsigned long _lastMilliPrint;
     typedef enum _ControlMode
     {

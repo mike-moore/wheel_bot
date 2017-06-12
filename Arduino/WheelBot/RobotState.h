@@ -50,7 +50,8 @@ class RobotState {
   /// - Robot control
   float ControlSignal;
   bool DoTestDrive;
-  bool TargetReached;
+  bool HeadingReached;
+  bool DistanceReached;
 
   /// - Telemetry
 
