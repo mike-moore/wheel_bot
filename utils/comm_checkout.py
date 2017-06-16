@@ -13,7 +13,7 @@ import comm_packet_pb2
 class CommCheckout(unittest.TestCase):
 
     def setUp(self):
-        self.testArticle = SerialCommunication("/dev/ttyUSB0")
+        self.testArticle = SerialCommunication("/dev/ttyUSB1")
         self.SuccessTransmissionCount = 0
         self.FailTransmissionCount = 0
 
@@ -36,7 +36,9 @@ class CommCheckout(unittest.TestCase):
             return None
 
     def helper_checkResponse(self, response):
+
         if response:
+            logging.info("Rx'd Response : " + str(response))
             self.SuccessTransmissionCount += 1
             logging.info("Success Packet # : " + str(self.SuccessTransmissionCount))
             #logging.info("Dumping received packet : \n" + str(response))

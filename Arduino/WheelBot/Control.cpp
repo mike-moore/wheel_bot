@@ -9,12 +9,6 @@ void Control::Execute() {
             // - Keep motors braked in idle mode.
             State.effectors.rightMotor.MotorBrake();
             State.effectors.leftMotor.MotorBrake();
-<<<<<<< HEAD
-            // - Perform rotation control
-            _performRotationControl();
-            // - Check for an active distance error
-            //_checkForDistanceControl();
-=======
             // - Check for an active heading error
             _checkForHeadingControl();
             // - Check for an active distance error only once heading
@@ -22,7 +16,6 @@ void Control::Execute() {
             if(!_headingError()){
                 _checkForDistanceControl();
             }
->>>>>>> b63a7b46088edc7505a0ea551da8d36148fcc9c1
             // - Monitor for test drive command. 
             //   Initiates open loop sequence.
             if (State.DoTestDrive){
@@ -33,44 +26,24 @@ void Control::Execute() {
         case ROTATIONAL_CTRL:
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
-<<<<<<< HEAD
-            //_printHeadingDebug();
-            if (State.effectors.leftMotor.ReachedPosition() && 
-                State.effectors.rightMotor.ReachedPosition()) {
-                State.TargetReached = true;
-                Mode = TRANSLATIONAL_CTRL;
-            }
-            // State.effectors.rightMotor.VelocityCmd(_velocityCmd); 
-            // State.effectors.leftMotor.VelocityCmd(-_velocityCmd); 
-=======
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
                 State.HeadingReached = true;
                 State.HeadingError = 0.0;
                 Mode = IDLE;
             }
->>>>>>> b63a7b46088edc7505a0ea551da8d36148fcc9c1
         break;
 
         case TRANSLATIONAL_CTRL:
-            _checkForDistanceControl();
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
-<<<<<<< HEAD
-                Serial.println("DISTANCE ERROR CLOSED OUT...STOPPING");
-                State.TargetReached = true;
-                Mode = IDLE;
-            }
-            
-=======
                 State.DistanceReached = true;
                 State.DistanceError = 0.0;
                 Mode = IDLE;
             }
 
->>>>>>> b63a7b46088edc7505a0ea551da8d36148fcc9c1
         break;
         
         case TEST_DRIVE:
@@ -117,20 +90,12 @@ void Control::_checkForDistanceControl(){
    if (_distanceError()){
         uint16_t pos_cmd = 0;
         if(State.DistanceError > 0.0){
-<<<<<<< HEAD
-            pos_cmd = State.DistanceError*360; 
-=======
             pos_cmd = abs(State.DistanceError)*MotorRotDegPerFt; 
->>>>>>> b63a7b46088edc7505a0ea551da8d36148fcc9c1
             State.effectors.rightMotor.FwdPositionCmd(pos_cmd); 
             State.effectors.leftMotor.FwdPositionCmd(pos_cmd); 
             Mode = TRANSLATIONAL_CTRL;
         }else{
-<<<<<<< HEAD
-            pos_cmd = State.DistanceError*360; 
-=======
             pos_cmd = abs(State.DistanceError)*MotorRotDegPerFt; 
->>>>>>> b63a7b46088edc7505a0ea551da8d36148fcc9c1
             State.effectors.rightMotor.BwdPositionCmd(pos_cmd); 
             State.effectors.leftMotor.BwdPositionCmd(pos_cmd); 
             Mode = TRANSLATIONAL_CTRL;
@@ -169,24 +134,6 @@ void Control::_performRotationControl(){
     float error = abs(State.HeadingError);
     _velocityCmd += _Kp*error + _Kd*error;
     _velocityCmd = constrain(_velocityCmd, -30, 30);
-    if (_headingError()){
-        uint16_t heading_cmd = 0;
-        if(State.HeadingError > 0.0){
-            heading_cmd = State.HeadingError*3.5; 
-            State.effectors.rightMotor.FwdPositionCmd(heading_cmd); 
-            State.effectors.leftMotor.BwdPositionCmd(heading_cmd); 
-            Mode = ROTATIONAL_CTRL;
-        }else{
-            heading_cmd = State.HeadingError*3.5; 
-            State.effectors.rightMotor.BwdPositionCmd(heading_cmd); 
-            State.effectors.leftMotor.FwdPositionCmd(heading_cmd); 
-            Mode = ROTATIONAL_CTRL;
-        }
-    }
-    if (!_headingError()){
-        Mode = IDLE;
-        _velocityCmd = 0.0;
-    }
 }
 
 void Control::_testDrive(){

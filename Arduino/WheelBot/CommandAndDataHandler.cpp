@@ -14,7 +14,7 @@ void CommandAndDataHandler::ProcessCmds() {
     ClearTelemetry();
     /// - Iterate over and process any rover commands that were sent
     for (uint_least8_t indx = 0; indx < Commands.RoverCmds_count; indx++){
-        //Serial.println("Processing New Rover Command Received ... ");
+        Serial.println("Processing New Rover Command Received ... ");
         ProcessRoverCmd(Commands.RoverCmds[indx]);
     }
     /// - Process the way point command if it was sent and valid
