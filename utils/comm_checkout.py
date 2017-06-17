@@ -13,7 +13,7 @@ import comm_packet_pb2
 class CommCheckout(unittest.TestCase):
 
     def setUp(self):
-        self.testArticle = SerialCommunication("/dev/ttyUSB1")
+        self.testArticle = SerialCommunication("/dev/ttyUSB0")
         self.SuccessTransmissionCount = 0
         self.FailTransmissionCount = 0
 

@@ -6,30 +6,53 @@ from google.protobuf.message import EncodeError
 from CmdResponseDefinitions import *
 
 class SerialCommunication(object):
-    def __init__(self, portName, frequency=0.5):
+    def __init__(self, portName, frequency=0.1):
         self.serialPort = serial.Serial(
             port=portName, baudrate=57600, rtscts=True, dsrdtr=True)
-        self.NumFailedPackets = 0
-    	self.cmdFooter = "SOE!"
+    	self.CmdFooter = "SOE!"
     	self.CommFrequency = frequency
-        self.MaxPacketFails = 20
         if self.serialPort.isOpen():
             logging.info('Serial communication running on port : ' + portName)
             self.serialPort.flushInput()
             self.serialPort.flushOutput()
+    
+    def sendWayPoint(self, name, heading, distance):
+        max_cmd_attempts = 20
+        # Build waypoint command packet 
+        way_point_cmd = comm_packet_pb2.CommandPacket()
+        way_point_cmd.WayPointCmd.Name = name
+        way_point_cmd.WayPointCmd.Heading = heading
+        way_point_cmd.WayPointCmd.Distance = distance
+        self.commandArduino(way_point_cmd, max_cmd_attempts)
 
-    def sendCommand(self, cmd):
-    	cmd_and_footer = cmd+self.cmdFooter
-        logging.debug(":".join("{:02x}".format(ord(c)) for c in cmd_and_footer))
-        self.serialPort.write(cmd_and_footer)
+    def getActiveWayPointName(self):
+        max_cmd_attempts = 10
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        active_waypt_cmd = cmd_packet.RoverCmds.add()
+        active_waypt_cmd.Id = WP_GET_ACTIVE
+        return self.commandArduino(cmd_packet, max_cmd_attempts).ActiveWayPoint
 
-    def commandArduino(self, cmd):
+    def commandTestDrive(self):
+        max_cmd_attempts = 10
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        test_drive_cmd = cmd_packet.RoverCmds.add()
+        test_drive_cmd.Id = DO_TEST_DRIVE
+        self.commandArduino(cmd_packet, max_cmd_attempts)
+
+    def stopTestDrive(self):
+        max_cmd_attempts = 10
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        test_drive_cmd = cmd_packet.RoverCmds.add()
+        test_drive_cmd.Id = STOP_TEST_DRIVE
+        self.commandArduino(cmd_packet, max_cmd_attempts)
+
+    def commandArduino(self, cmd, attemptsUntilTimeout):
         # Initialize response packet to none
         responseOk = False
         num_failed_packets = 0
-        # Keep attempting to command the arduino until we get a response
-        # or fail more packets than max packet fails
-        while(not responseOk and num_failed_packets <= self.MaxPacketFails):
+        # Keep attempting to send a command until we get a command
+        # accepted or rejected response
+        while(not responseOk and num_failed_packets <= attemptsUntilTimeout):
             # Tx cmds
             self.tx(cmd)
             # Give the Arduino time to respond.
@@ -38,7 +61,7 @@ class SerialCommunication(object):
             try:
                 response = self.readTelemetry()
                 if response and len(response.RoverStatus) > 0:
-                    responseOk = (response.RoverStatus[0].Id == WP_CMD_ACCEPT)
+                    responseOk = (response.RoverStatus[0].Id == CMD_ACCEPT or response.RoverStatus[0].Id == CMD_REJECT)
                 else:
                     responseOk = False
             except IOError:
@@ -46,9 +69,13 @@ class SerialCommunication(object):
                 self.serialPort.flushInput()
                 self.serialPort.flushOutput()
                 num_failed_packets += 1
+                time.sleep(self.CommFrequency)
         if not responseOk:
-            logging.error("Failed to send " + str(self.MaxPacketFails) + " command packets in a row. Check connections.")
+            logging.error("Failed to send " + str(attemptsUntilTimeout) + " command packets in a row. Check connections.")
             raise IOError
+        if responseOk and (response.RoverStatus[0].Id == CMD_REJECT):
+            logging.error("Command " + str(cmd) + " was rejected.")
+            raise IOError 
         return response
 
     def tx(self, cmd):
@@ -66,6 +93,11 @@ class SerialCommunication(object):
             return self.unpackTelemetry(bytes_rcvd)
         else:
             raise IOError
+
+    def sendCommand(self, cmd):
+        cmd_and_footer = cmd+self.CmdFooter
+        logging.debug(":".join("{:02x}".format(ord(c)) for c in cmd_and_footer))
+        self.serialPort.write(cmd_and_footer)
 
     def readRawBytes(self):
         bytes_read = ''

@@ -47,12 +47,15 @@ void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
     if (rover_cmd.Id == DO_TEST_DRIVE){
         Serial.println("STARTING TEST DRIVE");
         State.DoTestDrive = true;
+        PackInt(CMD_ACCEPT);
     }
     if (rover_cmd.Id == STOP_TEST_DRIVE){
         State.DoTestDrive = false;
+        PackInt(CMD_ACCEPT);
     }
     if(rover_cmd.Id == WP_GET_ACTIVE){
         Serial.println("WP GET ACTIVE");
+        PackInt(CMD_ACCEPT);
         strncpy(Telemetry.ActiveWayPoint, State.ActiveWayPoint.Name, 15);
         Telemetry.has_ActiveWayPoint = true;
     }
@@ -63,12 +66,10 @@ void CommandAndDataHandler::ProcessWayPointCmd(WayPoint & way_point_cmd) {
     if (State.WayPointQueue.count() < 15){
         Serial.println("adding waypoint to the queue.");
         State.WayPointQueue.push(way_point_cmd);
-        /// - Pack the waypoint acknowledged command
-        PackInt(WP_CMD_ACCEPT);
+        PackInt(CMD_ACCEPT);
     }else{
         Serial.println("reject waypoint");
-        /// - Pack the waypoint rejected command
-        PackInt(WP_CMD_REJECT);       
+        PackInt(CMD_REJECT);       
     }
 }
 
