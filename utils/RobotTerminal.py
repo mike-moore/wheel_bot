@@ -20,8 +20,11 @@ class RobotTerminal(Cmd):
 
     def do_get_active_waypoint(self, args):
         """ Gets the name of the active way point"""
-        active_way_point_name = serialComm.getActiveWayPointName()
-        print "The active waypoint is : " + active_way_point_name
+        try:
+            active_way_point_name = self.serialComm.getActiveWayPointName()
+            print "The active waypoint is : " + active_way_point_name
+        except IOError:
+            logging.error("Failed to get waypoint name.")
 
     def do_send_waypoint(self, args):
         """Prompts the user to enter a way-point and then sends it to the Arduino"""
@@ -35,11 +38,11 @@ class RobotTerminal(Cmd):
 
     def do_test_drive(self, args):
         """Sends a command to initiate a test drive"""
-        serialComm.commandTestDrive()
+        self.serialComm.commandTestDrive()
 
     def do_stop_test_drive(self, args):
         """Sends a command to stop the test drive"""
-        serialComm.stopTestDrive()
+        self.serialComm.stopTestDrive()
 
     def send_waypoint(self):
         try:
@@ -51,7 +54,7 @@ class RobotTerminal(Cmd):
             way_point_distance = float(raw_input())
         except ValueError:
             print "Invalid waypoint. Name must be a string less than 15 characters. Heading and distance must be a float."
-        serialComm.sendWayPoint(way_point_name, way_point_heading, way_point_distance)
+        self.serialComm.sendWayPoint(way_point_name, way_point_heading, way_point_distance)
 
     def send_csv_waypoints(self):
         with open('./Waypoints.csv') as waypoints:
@@ -60,10 +63,10 @@ class RobotTerminal(Cmd):
                 way_point_name = row['name']
                 way_point_heading = float(row['heading'])
                 way_point_distance = float(row['distance'])
-                serialComm.sendWayPoint(way_point_name, way_point_heading, way_point_distance)
+                self.serialComm.sendWayPoint(way_point_name, way_point_heading, way_point_distance)
 
 if __name__ == '__main__':
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG, format='%(levelname)s:%(message)s')
+    logging.basicConfig(stream=sys.stderr, level=logging.ERROR, format='%(levelname)s:%(message)s')
     prompt = RobotTerminal()
     prompt.prompt = '>> '
     prompt.cmdloop('Welcome to the Robot Terminal. Type "help" to see a list of commands.')

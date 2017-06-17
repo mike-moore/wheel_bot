@@ -6,7 +6,7 @@ from google.protobuf.message import EncodeError
 from CmdResponseDefinitions import *
 
 class SerialCommunication(object):
-    def __init__(self, portName, frequency=0.1):
+    def __init__(self, portName, frequency=0.05):
         self.serialPort = serial.Serial(
             port=portName, baudrate=57600, rtscts=True, dsrdtr=True)
     	self.CmdFooter = "SOE!"
@@ -17,7 +17,7 @@ class SerialCommunication(object):
             self.serialPort.flushOutput()
     
     def sendWayPoint(self, name, heading, distance):
-        max_cmd_attempts = 20
+        max_cmd_attempts = 40
         # Build waypoint command packet 
         way_point_cmd = comm_packet_pb2.CommandPacket()
         way_point_cmd.WayPointCmd.Name = name
@@ -26,21 +26,21 @@ class SerialCommunication(object):
         self.commandArduino(way_point_cmd, max_cmd_attempts)
 
     def getActiveWayPointName(self):
-        max_cmd_attempts = 10
+        max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
         active_waypt_cmd = cmd_packet.RoverCmds.add()
         active_waypt_cmd.Id = WP_GET_ACTIVE
         return self.commandArduino(cmd_packet, max_cmd_attempts).ActiveWayPoint
 
     def commandTestDrive(self):
-        max_cmd_attempts = 10
+        max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
         test_drive_cmd = cmd_packet.RoverCmds.add()
         test_drive_cmd.Id = DO_TEST_DRIVE
         self.commandArduino(cmd_packet, max_cmd_attempts)
 
     def stopTestDrive(self):
-        max_cmd_attempts = 10
+        max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
         test_drive_cmd = cmd_packet.RoverCmds.add()
         test_drive_cmd.Id = STOP_TEST_DRIVE
@@ -52,7 +52,7 @@ class SerialCommunication(object):
         num_failed_packets = 0
         # Keep attempting to send a command until we get a command
         # accepted or rejected response
-        while(not responseOk and num_failed_packets <= attemptsUntilTimeout):
+        while(not responseOk and num_failed_packets < attemptsUntilTimeout):
             # Tx cmds
             self.tx(cmd)
             # Give the Arduino time to respond.
@@ -66,8 +66,8 @@ class SerialCommunication(object):
                     responseOk = False
             except IOError:
                 logging.info("Failed to send single packet :" + str(cmd))
-                self.serialPort.flushInput()
-                self.serialPort.flushOutput()
+                #self.serialPort.flushInput()
+                #self.serialPort.flushOutput()
                 num_failed_packets += 1
                 time.sleep(self.CommFrequency)
         if not responseOk:
