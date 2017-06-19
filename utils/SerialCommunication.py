@@ -17,34 +17,51 @@ class SerialCommunication(object):
             self.serialPort.flushOutput()
     
     def sendWayPoint(self, name, heading, distance):
-        max_cmd_attempts = 40
+        max_cmd_attempts = 190
         # Build waypoint command packet 
         way_point_cmd = comm_packet_pb2.CommandPacket()
         way_point_cmd.WayPointCmd.Name = name
         way_point_cmd.WayPointCmd.Heading = heading
         way_point_cmd.WayPointCmd.Distance = distance
-        self.commandArduino(way_point_cmd, max_cmd_attempts)
+        try:
+            self.commandArduino(way_point_cmd, max_cmd_attempts)
+            print "Waypoint command : " + str(name) + " accepted."
+        except IOError:
+            print "Waypoint command : " + str(name) + " failed."
 
     def getActiveWayPointName(self):
         max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
         active_waypt_cmd = cmd_packet.RoverCmds.add()
         active_waypt_cmd.Id = WP_GET_ACTIVE
-        return self.commandArduino(cmd_packet, max_cmd_attempts).ActiveWayPoint
+        try:
+            active_waypoint_name = self.commandArduino(cmd_packet, max_cmd_attempts).ActiveWayPoint
+            return active_waypoint_name
+        except IOError:
+            print "Get active waypoint command failed."
+        return ""
 
     def commandTestDrive(self):
         max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
         test_drive_cmd = cmd_packet.RoverCmds.add()
         test_drive_cmd.Id = DO_TEST_DRIVE
-        self.commandArduino(cmd_packet, max_cmd_attempts)
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Test drive command accepted."
+        except IOError:
+            print "Test drive command failed."
 
     def stopTestDrive(self):
         max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
         test_drive_cmd = cmd_packet.RoverCmds.add()
         test_drive_cmd.Id = STOP_TEST_DRIVE
-        self.commandArduino(cmd_packet, max_cmd_attempts)
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Stop test drive command accepted."
+        except IOError:
+            print "Stop test drive command failed."
 
     def commandArduino(self, cmd, attemptsUntilTimeout):
         # Initialize response packet to none

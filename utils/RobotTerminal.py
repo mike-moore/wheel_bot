@@ -11,7 +11,7 @@ class RobotTerminal(Cmd):
 
     def __init__(self):
         Cmd.__init__(self)
-        self.portName = "/dev/ttyUSB0"
+        self.portName = "/dev/ttyUSB1"
         self.serialComm = SerialCommunication(self.portName)
 
     def do_exit(self, args):
@@ -20,11 +20,9 @@ class RobotTerminal(Cmd):
 
     def do_get_active_waypoint(self, args):
         """ Gets the name of the active way point"""
-        try:
-            active_way_point_name = self.serialComm.getActiveWayPointName()
+        active_way_point_name = self.serialComm.getActiveWayPointName()
+        if active_way_point_name:
             print "The active waypoint is : " + active_way_point_name
-        except IOError:
-            logging.error("Failed to get waypoint name.")
 
     def do_send_waypoint(self, args):
         """Prompts the user to enter a way-point and then sends it to the Arduino"""
@@ -33,7 +31,7 @@ class RobotTerminal(Cmd):
 
     def do_send_csv_waypoints(self, args):
         """Opens and reads a set of way-points from a csv file and sends them to the Arduino"""
-        self.send_csv_waypoints()
+        self.send_csv_waypoints(args)
         return
 
     def do_test_drive(self, args):
@@ -56,13 +54,13 @@ class RobotTerminal(Cmd):
             print "Invalid waypoint. Name must be a string less than 15 characters. Heading and distance must be a float."
         self.serialComm.sendWayPoint(way_point_name, way_point_heading, way_point_distance)
 
-    def send_csv_waypoints(self):
-        with open('./Waypoints.csv') as waypoints:
+    def send_csv_waypoints(self, csv_file):
+        with open(csv_file) as waypoints:
             waypoint_reader = csv.DictReader(waypoints)
             for row in waypoint_reader:
-                way_point_name = row['name']
-                way_point_heading = float(row['heading'])
-                way_point_distance = float(row['distance'])
+                way_point_name = row['Name']
+                way_point_heading = float(row['Heading'])
+                way_point_distance = float(row['Distance'])
                 self.serialComm.sendWayPoint(way_point_name, way_point_heading, way_point_distance)
 
 if __name__ == '__main__':
