@@ -43,6 +43,11 @@ int ProtobuffSerial::ReadPacket() {
             return RX_PACKET_READY;
         }
     }
+
+    if(RxByteCounter >= CommandPacket_size + 4){
+        return RX_PACKET_FAIL;
+    }
+
 	return RX_READING_PACKET;
 }
 

@@ -44,4 +44,3 @@ void Guidance::Execute() {
     }
     return;
 }
-
