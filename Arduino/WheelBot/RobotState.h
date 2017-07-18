@@ -36,9 +36,9 @@ class RobotState {
   RobotEffectors effectors;
 
   /// - Sensor readings
-  float SensedHeading;
+  float FilteredSensedHeading;
   float SensedDistance;
-
+  
   /// - Robot guidance
   WayPoint ActiveWayPoint;
   QueueList <WayPoint> WayPointQueue;

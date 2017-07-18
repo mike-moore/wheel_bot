@@ -23,7 +23,7 @@ const long cycleTimeCommRx = 20;
 unsigned long previousMillisCommRx = 0;
 const long cycleTimeCommTx = 20;
 unsigned long previousMillisCommTx = 0;
-const long cycleTimeNav = 2000;
+const long cycleTimeNav = 200;
 unsigned long previousMillisNav = 0;
 const long cycleTimeGuidance = 1000;
 unsigned long previousMillisGuidance = 0;
@@ -55,6 +55,7 @@ void setup(){
   navigation.InitSensors();
   // - Very Important: attach interrupt service routines for motor encoders
   setup_encoders();
+  robotState.DoTestDrive = true;
 }
 
 void setup_encoders(){
@@ -69,8 +70,7 @@ void setup_encoders(){
 }
 
 void loop(){
-  unsigned long currentMillis = millis();
-  // Disable all interrupts for Communication System; time sensitive
+  unsigned long currentMillis = millis(); 
   /// - Comm Rx
   if (currentMillis - previousMillisCommRx >= cycleTimeCommRx) {
     previousMillisCommRx = currentMillis;
@@ -82,8 +82,7 @@ void loop(){
       cmdAndDataHandler.ProcessCmds();
     }
   }
-  
-  // Enable all interrupts 
+
   /// - Navigation
   if (currentMillis - previousMillisNav >= cycleTimeNav) {
     previousMillisNav = currentMillis;

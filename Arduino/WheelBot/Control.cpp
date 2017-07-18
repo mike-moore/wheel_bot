@@ -26,11 +26,13 @@ void Control::Execute() {
         case ROTATIONAL_CTRL:
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
-            if (State.effectors.leftMotor.ReachedPosition() && 
-                State.effectors.rightMotor.ReachedPosition()) {
-                State.HeadingReached = true;
-                State.HeadingError = 0.0;
-                Mode = IDLE;
+            if(filteredError <= 5.0){
+                if (State.effectors.leftMotor.ReachedPosition() && 
+                    State.effectors.rightMotor.ReachedPosition()) {
+                    State.HeadingReached = true;
+                    State.HeadingError = 0.0;
+                    Mode = IDLE;
+                }
             }
         break;
 
@@ -81,11 +83,52 @@ void Control::_checkForHeadingControl(){
             State.effectors.leftMotor.BwdPositionCmd(pos_cmd); 
             Mode = ROTATIONAL_CTRL;
         }
-    }else{
+        if(State.HeadingError >= 45.0){
+            velocityRight
+            State.effectors.rightMotor.VelocityCmd(velocityRight); 
+            State.effectors.leftMotor.VelocityCmd(velocityLeft);
+            Mode = ROTATIONAL_CTRL;
+        }
+    else{
         State.HeadingReached = true;
+    }
     }
 }
 
+float Control::_pdHeadingControl(){
+    float filteredError = 0.0;
+
+    _Kp_Left = 0.45;
+    _Kp_Right = 0.506;
+    _Kd_Left = 0.05; 
+    _Kd_Right = 0.05;
+            
+    float error = State.HeadingError;
+    errorRate = error - prev_error;
+    filteredError = getFilteredError(abs(error));
+            
+    velocityRight = -_Kp_Right*error + _Kd_Right*errorRate;
+    velocityLeft = _Kp_Left*error - _Kd_Left*errorRate;
+    velocityRight = constrain(velocityRight, -30, 30);
+    velocityLeft = constrain(velocityLeft, -30, 30);
+
+    prev_error = error;
+    return;
+}
+
+float Control::getFilteredError(float error){
+    float sum = 0.0;
+    for (int i = 0; i < SIZE_ERROR_BUFFER-1; i++){
+        errorBuffer[i+1] = errorBuffer[i];
+    }
+    errorBuffer[0] = error;
+
+    for (int i = 0; i < SIZE_ERROR_BUFFER; i++){
+            sum += errorBuffer[i];
+    }
+    return sum/SIZE_ERROR_BUFFER;
+}
+   
 void Control::_checkForDistanceControl(){
    if (_distanceError()){
         uint16_t pos_cmd = 0;
@@ -113,7 +156,7 @@ void Control::_printHeadingDebug(){
   if((millis()-_lastMilliPrint) >= 2000){                     
         _lastMilliPrint = millis();
         Serial.print("Current heading : ");
-        Serial.println(State.SensedHeading);
+        Serial.println(State.FilteredSensedHeading);
         Serial.print("Desired heading : ");
         Serial.println(State.ActiveWayPoint.Heading);
         Serial.print("Velocity Cmd : ");
@@ -179,10 +222,11 @@ void Control::_testDrive(){
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
                 Serial.println("RIGHT TURN POSITION TEST COMPLETE");
+                Serial.println("HEADING CONTROL TEST STARTING");
                 //Serial.println("SPEED UP VELOCITY TEST STARTING");
                 _firstPass = true;
                 //_testDriveState = SPEED_UP_VEL_TEST;
-                _testDriveState = FWD_POS_TEST;
+                _testDriveState = HEADING_CONTROL_TEST;
             }
 
         break;
@@ -190,7 +234,7 @@ void Control::_testDrive(){
         case SPEED_UP_VEL_TEST:
             /// - Used to ramp up the velocity command
             lengthOfTestInSeconds = 20.0;
-            maxRpm = 30.0;
+            maxRpm = 10.0;
             _numSecondsInTest += (float) cycleTimeControl/1000.0;
             /// - Set the velocity command proportionally to the length of time
             ///   in this test velocity mode. R motor gets positive vel cmd,
@@ -215,7 +259,7 @@ void Control::_testDrive(){
         case SLOW_DOWN_VEL_TEST:
             /// - Used to ramp up the velocity command
             lengthOfTestInSeconds = 20.0;
-            maxRpm = 30.0;
+            maxRpm = 10.0;
             _numSecondsInTest += (float) cycleTimeControl/1000.0;
             /// - Set the velocity command proportionally to the length of time
             ///   in this test velocity mode. R motor gets positive vel cmd,
@@ -231,9 +275,57 @@ void Control::_testDrive(){
                 State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
                 State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
                 Serial.println("SLOW DOWN VELOCITY TEST COMPLETE");
-                _testDriveState = FWD_POS_TEST;
+                _testDriveState = SPEED_UP_VEL_TEST;
                 _numSecondsInTest = 0.0;
             }
-        break;     
+        break;
+
+        case HEADING_CONTROL_TEST:
+            float desiredHeading = 180.0;
+            float filteredError = 0.0;
+            State.HeadingError = desiredHeading - State.FilteredSensedHeading;
+            Serial.print("Sensed heading : ");
+            Serial.println(State.FilteredSensedHeading);
+            Serial.println("");
+
+            Serial.print("Heading Error : ");
+            Serial.println(State.HeadingError);
+            Serial.println("");
+
+            _Kp_Left = 0.45;
+            _Kp_Right = 0.506;
+            _Kd_Left = 0.05; 
+            _Kd_Right = 0.05;
+            
+            float error = State.HeadingError;
+            errorRate = error - prev_error;
+            filteredError = getFilteredError(abs(error));
+            
+            velocityRight = -_Kp_Right*error + _Kd_Right*errorRate;
+            velocityLeft = _Kp_Left*error - _Kd_Left*errorRate;
+            velocityRight = constrain(velocityRight, -30, 30);
+            velocityLeft = constrain(velocityLeft, -30, 30);
+            Serial.print("Velocity Right : ");
+            Serial.println(velocityRight);
+            Serial.print("Velocity Left : ");
+            Serial.println(velocityLeft);
+            Serial.println("");
+
+            State.effectors.rightMotor.VelocityCmd(velocityRight); 
+            State.effectors.leftMotor.VelocityCmd(velocityLeft);
+   
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
+
+            //if(filteredError <= 5.0){
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition())
+                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
+                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
+            //}
+            
+            //_testDriveState = TURN_RIGHT_TEST;
+            prev_error = error;
+        break;    
     }
 }

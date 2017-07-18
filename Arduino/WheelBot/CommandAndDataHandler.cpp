@@ -36,7 +36,7 @@ void CommandAndDataHandler::ClearTelemetry() {
 
 void CommandAndDataHandler::LoadTelemetry() {
     /// - Load up all the required telemetry based on the robot's state.
-    Telemetry.MeasuredHeading = State.SensedHeading;
+    Telemetry.MeasuredHeading = State.FilteredSensedHeading;
     Telemetry.MeasuredDistance = State.SensedDistance;
     /// - Load the conditional telemetry. Data that has to be requested
     ///   in order to be sent.

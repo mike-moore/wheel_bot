@@ -17,7 +17,7 @@ class SerialCommunication(object):
             self.serialPort.flushOutput()
     
     def sendWayPoint(self, name, heading, distance):
-        max_cmd_attempts = 190
+        max_cmd_attempts = 100
         # Build waypoint command packet 
         way_point_cmd = comm_packet_pb2.CommandPacket()
         way_point_cmd.WayPointCmd.Name = name

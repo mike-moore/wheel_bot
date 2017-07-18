@@ -3,12 +3,12 @@
 RobotState::RobotState() 
  :
  effectors(),
- SensedHeading(0.0),
+ FilteredSensedHeading(0.0),
  SensedDistance(0.0),
  ActiveWayPoint(),
  WayPointQueue(),
  HeadingError(0.0),
- HeadingErrorTol(2.0),
+ HeadingErrorTol(5.0),
  DistanceError(0.0),
  DistanceErrorTol(0.25),
  ControlSignal(0.0),

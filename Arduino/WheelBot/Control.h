@@ -15,6 +15,8 @@
 
 #include "RobotState.h"
 
+#define SIZE_ERROR_BUFFER 10
+
 ///////////////////////////////////////////////////////////////
 /// @class Control
 /// @ingroup WheelBot
@@ -24,23 +26,26 @@ class Control {
  public:
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
             _positionCmd(0.0), _Kp(5.0), _Kd(0.5), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
-            Mode(IDLE), _testDriveState(FWD_POS_TEST), _numSecondsInTest(0.0),
-            _firstPass(true) {};
+            Mode(IDLE), _testDriveState(HEADING_CONTROL_TEST), _numSecondsInTest(0.0), _firstPass(true), errorRate(0.0), 
+            velocityRight(0.0), velocityLeft(0.0), prev_error(0.0), _Kp_Left(0.0), _Kp_Right(0.0),_Kd_Right(0.0), _Kd_Left(0.0){};
 
     ~Control(){};
 
     void Execute();
+    float getFilteredError(float error);
+    float errorBuffer[SIZE_ERROR_BUFFER];
 
  private:
-
     bool _headingError();
     void _checkForDistanceControl();
     void _checkForHeadingControl();
+    void _performHeadingControl();
     bool _distanceError();
     void _printHeadingDebug();
     void _printDistanceDebug();
     void _performRotationControl();
     void _testDrive();
+    float _pdHeadingControl();
     RobotState& State;
     float _velocityCmd;
     float _positionCmd;
@@ -54,7 +59,7 @@ class Control {
       IDLE                = 0,
       ROTATIONAL_CTRL     = 1,
       TRANSLATIONAL_CTRL  = 2,
-      TEST_DRIVE          = 4
+      TEST_DRIVE          = 3
     }ControlMode;
     ControlMode Mode;
 	// Moding used for a test drive
@@ -63,11 +68,20 @@ class Control {
 	    FWD_POS_TEST = 0,
 	    TURN_RIGHT_TEST = 1,
 	    SPEED_UP_VEL_TEST = 2,
-      SLOW_DOWN_VEL_TEST = 3     
-	};
+      SLOW_DOWN_VEL_TEST = 3,
+      HEADING_CONTROL_TEST = 4 
+  };
     TestDriveRoute _testDriveState;
     float _numSecondsInTest;
     bool _firstPass;
+    float errorRate;
+    float velocityRight;
+    float velocityLeft;
+    float prev_error;
+    float _Kp_Left;
+    float _Kp_Right;
+    float _Kd_Right;
+    float _Kd_Left;
 };
   
 

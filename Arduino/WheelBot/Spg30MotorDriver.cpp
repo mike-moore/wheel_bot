@@ -67,27 +67,27 @@ void Spg30MotorDriver::run(){
 }
 
 void Spg30MotorDriver::_pidControl(){
-	  	_updatePid();
-	  	analogWrite(_pwmPin, _pwmCmd);
-    _printMotorInfo();
+    _updatePid();
+    analogWrite(_pwmPin, _pwmCmd);
+    //_printMotorInfo();
 }
 
 void Spg30MotorDriver::_updatePid(){
     float pidTerm = 0;
-    int error=0;                                  
-	  if (_velocityCmd < 0.0){
-	     	digitalWrite(_motorPinA1, HIGH);
-	     	digitalWrite(_motorPinB1, LOW);                  
+    int error=0;
+    if (_velocityCmd < 0.0){
+        digitalWrite(_motorPinA1, HIGH);
+        digitalWrite(_motorPinB1, LOW);                  
 	  }else {
-	      digitalWrite(_motorPinA1, LOW);
-	     	digitalWrite(_motorPinB1, HIGH);    
+        digitalWrite(_motorPinA1, LOW);
+        digitalWrite(_motorPinB1, HIGH);    
 	  }
-	  error = abs(_velocityCmd) - abs(_measuredSpeed); 
+	error = abs(_velocityCmd) - abs(_measuredSpeed); 
     error = constrain(error, -10, 10);
-    _errorAccum = constrain(_errorAccum, -150, 150);
-	  pidTerm = _pwmLookup[abs(_velocityCmd)] + (_Kp * error) + (_Ki * _errorAccum);                            
     _errorAccum += error;
-	  _pwmCmd = constrain(int(pidTerm), MTR_DEADBAND_LOW, 255);
+    _errorAccum = constrain(_errorAccum, -150, 150);
+    pidTerm = _pwmLookup[abs(_velocityCmd)] + (_Kp * error) + (_Ki * _errorAccum);
+	_pwmCmd = constrain(int(pidTerm), 15, 255);
 }
 
 void Spg30MotorDriver::_positionControl(){
@@ -123,7 +123,7 @@ void Spg30MotorDriver::_motorBrake(){
 void Spg30MotorDriver::_printMotorInfo(){  
   if((millis()-_lastMilliPrint) >= 500){                     
         _lastMilliPrint = millis();
-        Serial.print("Error Accum:");             Serial.println(_errorAccum);  
+        Serial.print("Error Accum:");    Serial.println(_errorAccum);  
         Serial.print("SP:");             Serial.println(_velocityCmd);  
         Serial.print("  RPM:");          Serial.println(_measuredSpeed);
         Serial.print("  PWM:");          Serial.println(_pwmCmd);

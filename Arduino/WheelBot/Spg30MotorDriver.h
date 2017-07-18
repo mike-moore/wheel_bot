@@ -16,7 +16,7 @@
 
 #include <Arduino.h>
 
-#define MTR_DEADBAND_LOW 125
+#define MTR_DEADBAND_LOW 15
 static const int _pwmLookup[30] =
 {
     MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW,

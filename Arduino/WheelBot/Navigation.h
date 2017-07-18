@@ -15,6 +15,8 @@
 
 #include "RobotState.h"
 
+#define SIZE_HEADING_BUFFER 20
+
 ///////////////////////////////////////////////////////////////
 /// @class Navigation
 /// @ingroup WheelBot
@@ -27,6 +29,8 @@ class Navigation {
 
     void InitSensors();
     void Execute();
+    float getFilteredHeading(float sensedHeading);
+    float sensedHeadingBuffer[SIZE_HEADING_BUFFER];
 
  private:
     RobotState& State;
