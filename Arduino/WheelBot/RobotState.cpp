@@ -9,7 +9,7 @@ RobotState::RobotState()
  WayPointQueue(),
  HeadingError(0.0),
  AverageHeadingError(0.0),
- HeadingErrorTol(5.0),
+ HeadingErrorTol(1.0),
  DistanceError(0.0),
  DistanceErrorTol(0.25),
  ControlSignal(0.0),

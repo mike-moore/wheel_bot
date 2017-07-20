@@ -168,6 +168,7 @@ void Control::_testDrive(){
             if (_TurnRightCount >= 4){
                 _TurnRightCount = 0;
                 _firstPass = true;
+                delay(5000);
                 _testDriveState = DRIVE_FWD_CL;
             }
 
@@ -175,7 +176,6 @@ void Control::_testDrive(){
 
         case DRIVE_FWD_CL:
             if(_firstPass){
-                State.sensors.magnetometer.Init();
                 State.ClosedLoopControl = true;
                 State.effectors.rightMotor.FwdPositionCmd(720); 
                 State.effectors.leftMotor.FwdPositionCmd(720); 
@@ -191,12 +191,14 @@ void Control::_testDrive(){
         break;
 
         case TURN_RIGHT_CL:
-            float error_rate = 0.0;
             float velocity_right = 0.0;
             float velocity_left = 0.0;
+            float error_rate = 0.0;
             if(_firstPass){
                 _firstPass=false;
                 _cmdHeading = State.SensedHeading + 90.0;
+                _errorAccum = 0.0;
+                State.AverageHeadingError = _cmdHeading - State.SensedHeading;
             }
             State.HeadingError = _cmdHeading - State.SensedHeading;
             if (State.HeadingError > 180.0){
@@ -205,11 +207,12 @@ void Control::_testDrive(){
             if (State.HeadingError < -180.0){
               State.HeadingError += 360.0;
             }
+            _errorAccum += State.HeadingError;
             error_rate = State.HeadingError - _prevError;
             _prevError = State.HeadingError;
 
-            velocity_right = -_Kp_Right*State.HeadingError + _Kd_Right*error_rate;
-            velocity_left = _Kp_Left*State.HeadingError - _Kd_Left*error_rate;
+            velocity_right = -_Kp_Right*State.HeadingError - _Ki_Right*_errorAccum + _Kd_Right*error_rate;
+            velocity_left = _Kp_Left*State.HeadingError + _Ki_Left*_errorAccum - _Kd_Left*error_rate;
 
             if (abs(State.AverageHeadingError) > State.HeadingErrorTol) {
                 State.effectors.rightMotor.VelocityCmd(velocity_right); 

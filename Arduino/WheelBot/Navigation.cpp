@@ -1,6 +1,7 @@
 #include "Navigation.h"
 
 void Navigation::InitSensors() {
+    State.sensors.magnetometer.Init();
     for (int i = 0; i < SIZE_HEADING_BUFFER; i++){
         sensedHeadingBuffer[i] = 0.0;
     }    
@@ -31,7 +32,7 @@ float Navigation::getFilteredHeading(float sensedHeading){
     return sum/SIZE_HEADING_BUFFER;
 }
 
-float Navigation::avgError(){
+void Navigation::avgError(){
     float sum = 0.0;
     for (int i = 0; i < SIZE_ERROR_BUFFER-1; i++){
         _errorBuffer[i+1] = _errorBuffer[i];

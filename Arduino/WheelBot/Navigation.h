@@ -34,6 +34,7 @@ class Navigation {
     float sensedHeadingBuffer[SIZE_HEADING_BUFFER];
 
  private:
+    void avgError();
     RobotState& State;
     float _errorBuffer[SIZE_ERROR_BUFFER];
 };
