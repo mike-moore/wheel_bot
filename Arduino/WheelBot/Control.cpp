@@ -26,13 +26,11 @@ void Control::Execute() {
         case ROTATIONAL_CTRL:
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
-            if(filteredError <= 5.0){
-                if (State.effectors.leftMotor.ReachedPosition() && 
-                    State.effectors.rightMotor.ReachedPosition()) {
-                    State.HeadingReached = true;
-                    State.HeadingError = 0.0;
-                    Mode = IDLE;
-                }
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition()) {
+                State.HeadingReached = true;
+                State.HeadingError = 0.0;
+                Mode = IDLE;
             }
         break;
 
