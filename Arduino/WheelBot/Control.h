@@ -26,8 +26,8 @@ class Control {
  public:
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
             _positionCmd(0.0), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
-            Mode(IDLE), _testDriveState(DRIVE_FWD_OL), _firstPass(true), _prevError(0.0), _Kp_Left(0.45), _Kp_Right(0.506),
-            _Kd_Right(0.05), _Kd_Left(0.05), _TurnRightCount(0){};
+            Mode(IDLE), _testDriveState(DRIVE_FWD_CL), _firstPass(true), _prevError(0.0), _Kp_Left(0.45), _Kp_Right(0.506),
+            _Kd_Right(0.05), _Kd_Left(0.05), _TurnRightCount(0), _cmdHeading(0.0) {};
 
     ~Control(){};
 
@@ -71,6 +71,7 @@ class Control {
     float _Kd_Right;
     float _Kd_Left;
     uint16_t _TurnRightCount;
+    float _cmdHeading;
 };
   
 

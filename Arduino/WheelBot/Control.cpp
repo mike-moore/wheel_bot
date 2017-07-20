@@ -164,8 +164,8 @@ void Control::_testDrive(){
                 _TurnRightCount++;
             }
 
-            // - Swap over to closed loop after 8 right turns
-            if (_TurnRightCount >= 8){
+            // - Swap over to closed loop after 4 right turns
+            if (_TurnRightCount >= 4){
                 _TurnRightCount = 0;
                 _firstPass = true;
                 _testDriveState = DRIVE_FWD_CL;
@@ -194,13 +194,17 @@ void Control::_testDrive(){
             float error_rate = 0.0;
             float velocity_right = 0.0;
             float velocity_left = 0.0;
-            float cmd_heading = 0.0;
             if(_firstPass){
                 _firstPass=false;
-                cmd_heading = State.SensedHeading + 90.0;
+                _cmdHeading = State.SensedHeading + 90.0;
             }
-
-            State.HeadingError = cmd_heading - State.SensedHeading;
+            State.HeadingError = _cmdHeading - State.SensedHeading;
+            if (State.HeadingError > 180.0){
+              State.HeadingError -= 360.0;
+            }
+            if (State.HeadingError < -180.0){
+              State.HeadingError += 360.0;
+            }
             error_rate = State.HeadingError - _prevError;
             _prevError = State.HeadingError;
 
@@ -208,6 +212,12 @@ void Control::_testDrive(){
             velocity_left = _Kp_Left*State.HeadingError - _Kd_Left*error_rate;
 
             if (_headingError()) {
+                Serial.print("Command Heading : ");
+                Serial.println(_cmdHeading);
+                Serial.print("Sensed Heading : ");
+                Serial.println(State.SensedHeading);
+                Serial.print("Heading error : ");
+                Serial.println(State.HeadingError);
                 State.effectors.rightMotor.VelocityCmd(velocity_right); 
                 State.effectors.leftMotor.VelocityCmd(velocity_left);
                 State.effectors.rightMotor.run();
@@ -220,8 +230,8 @@ void Control::_testDrive(){
                 _TurnRightCount++;
             }
 
-            // - Stop test drive after 8 closed loop right turns
-            if (_TurnRightCount >= 8){
+            // - Stop test drive after 4 closed loop right turns
+            if (_TurnRightCount >= 4){
                 _TurnRightCount = 0;
                 _testDriveState = DRIVE_FWD_OL;
                  State.DoTestDrive = false;
