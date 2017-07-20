@@ -20,7 +20,7 @@ void Guidance::Execute() {
                 Serial.print("Tracking to new waypoint : ");
                 Serial.println(State.ActiveWayPoint.Name);
                 /// - Compute the errors for control
-                State.HeadingError =  State.ActiveWayPoint.Heading - State.FilteredSensedHeading;
+                State.HeadingError =  State.ActiveWayPoint.Heading; //- State.FilteredSensedHeading;
                 State.DistanceError = State.ActiveWayPoint.Distance; //- State.SensedDistance;
                 Mode = TRACKING;
             }

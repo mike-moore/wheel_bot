@@ -8,13 +8,10 @@ void Navigation::InitSensors() {
 }
 
 void Navigation::Execute() {
-    float sensedHeading = State.sensors.magnetometer.ReadHeading();
-    State.FilteredSensedHeading = getFilteredHeading(sensedHeading);
-    //State.SensedHeading  = 0.0;
+    //float sensedHeading = State.sensors.magnetometer.ReadHeading();
+    //State.FilteredSensedHeading = getFilteredHeading(sensedHeading);
+    State.SensedHeading  = 0.0;
     State.SensedDistance = 0.0;
-    Serial.print("Filtered Sensed heading : ");
-    Serial.println(State.FilteredSensedHeading);
-    Serial.println("");
 }
 
 float Navigation::getFilteredHeading(float sensedHeading){

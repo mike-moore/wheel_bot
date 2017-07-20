@@ -83,19 +83,12 @@ void Control::_checkForHeadingControl(){
             State.effectors.leftMotor.BwdPositionCmd(pos_cmd); 
             Mode = ROTATIONAL_CTRL;
         }
-        if(State.HeadingError >= 45.0){
-            velocityRight
-            State.effectors.rightMotor.VelocityCmd(velocityRight); 
-            State.effectors.leftMotor.VelocityCmd(velocityLeft);
-            Mode = ROTATIONAL_CTRL;
-        }
-    else{
+    }else{
         State.HeadingReached = true;
-    }
     }
 }
 
-float Control::_pdHeadingControl(){
+void Control::_pdHeadingControl(){
     float filteredError = 0.0;
 
     _Kp_Left = 0.45;
@@ -180,152 +173,71 @@ void Control::_performRotationControl(){
 }
 
 void Control::_testDrive(){
-
-    float lengthOfTestInSeconds = 20.0;
-    float maxRpm = 35.0;
-    float velocityCmd = 0.0;
     switch(_testDriveState)
     {
-        case FWD_POS_TEST:
+        case DRIVE_FWD_OL:
             if(_firstPass){
-                Serial.println("FWD POSITION TEST STARTING");
                 State.effectors.rightMotor.FwdPositionCmd(720); 
                 State.effectors.leftMotor.FwdPositionCmd(720); 
                 _firstPass=false;
             }
-            /// - Keep running the controller until it's put back in to the IDLE
-            ///   mode
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
-
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
-                Serial.println("FWD POSITION TEST COMPLETE");
                 _firstPass = true;
-                _testDriveState = TURN_RIGHT_TEST;
+                _testDriveState = TURN_RIGHT_OL;
             }
-
         break;
 
-        case TURN_RIGHT_TEST:
+        case TURN_RIGHT_OL:
             if(_firstPass){
-                Serial.println("RIGHT TURN POSITION TEST STARTING");
                 State.effectors.rightMotor.BwdPositionCmd(305); 
                 State.effectors.leftMotor.FwdPositionCmd(305); 
                 _firstPass=false;
             }
-            /// - Keep running the controller until it's put back in to the IDLE
-            ///   mode
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
 
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
-                Serial.println("RIGHT TURN POSITION TEST COMPLETE");
-                Serial.println("HEADING CONTROL TEST STARTING");
-                //Serial.println("SPEED UP VELOCITY TEST STARTING");
                 _firstPass = true;
-                //_testDriveState = SPEED_UP_VEL_TEST;
-                _testDriveState = HEADING_CONTROL_TEST;
+                _testDriveState = DRIVE_FWD_OL;
             }
 
         break;
 
-        case SPEED_UP_VEL_TEST:
-            /// - Used to ramp up the velocity command
-            lengthOfTestInSeconds = 20.0;
-            maxRpm = 10.0;
-            _numSecondsInTest += (float) cycleTimeControl/1000.0;
-            /// - Set the velocity command proportionally to the length of time
-            ///   in this test velocity mode. R motor gets positive vel cmd,
-            ///   L motor gets negative vel cmd
-            velocityCmd = _numSecondsInTest/lengthOfTestInSeconds*maxRpm;
-            State.effectors.rightMotor.VelocityCmd(velocityCmd); 
-            State.effectors.leftMotor.VelocityCmd(velocityCmd); 
-            /// - Run the motor controller until the end of the test
-            if (_numSecondsInTest < lengthOfTestInSeconds) {
-                State.effectors.rightMotor.run();
-                State.effectors.leftMotor.run();
-            }else{
-                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
-                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
-                Serial.println("SPEED UP VELOCITY TEST COMPLETE");
-                _testDriveState = SLOW_DOWN_VEL_TEST;
-                Serial.println("SLOW DOWN VELOCITY TEST STARTING");
-                _numSecondsInTest = 0.0;
+        case DRIVE_FWD_CL:
+            if(_firstPass){
+                State.effectors.rightMotor.FwdPositionCmd(720); 
+                State.effectors.leftMotor.FwdPositionCmd(720); 
+                _firstPass=false;
             }
-        break; 
-            
-        case SLOW_DOWN_VEL_TEST:
-            /// - Used to ramp up the velocity command
-            lengthOfTestInSeconds = 20.0;
-            maxRpm = 10.0;
-            _numSecondsInTest += (float) cycleTimeControl/1000.0;
-            /// - Set the velocity command proportionally to the length of time
-            ///   in this test velocity mode. R motor gets positive vel cmd,
-            ///   L motor gets negative vel cmd
-            velocityCmd = (1-_numSecondsInTest/lengthOfTestInSeconds)*maxRpm;
-            State.effectors.rightMotor.VelocityCmd(velocityCmd); 
-            State.effectors.leftMotor.VelocityCmd(velocityCmd); 
-            /// - Run the motor controller until the end of the test
-            if (_numSecondsInTest < lengthOfTestInSeconds) {
-                State.effectors.rightMotor.run();
-                State.effectors.leftMotor.run();
-            }else{
-                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
-                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
-                Serial.println("SLOW DOWN VELOCITY TEST COMPLETE");
-                _testDriveState = SPEED_UP_VEL_TEST;
-                _numSecondsInTest = 0.0;
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition()) {
+                _firstPass = true;
+                _testDriveState = TURN_RIGHT_CL;
             }
         break;
 
-        case HEADING_CONTROL_TEST:
-            float desiredHeading = 180.0;
-            float filteredError = 0.0;
-            State.HeadingError = desiredHeading - State.FilteredSensedHeading;
-            Serial.print("Sensed heading : ");
-            Serial.println(State.FilteredSensedHeading);
-            Serial.println("");
-
-            Serial.print("Heading Error : ");
-            Serial.println(State.HeadingError);
-            Serial.println("");
-
-            _Kp_Left = 0.45;
-            _Kp_Right = 0.506;
-            _Kd_Left = 0.05; 
-            _Kd_Right = 0.05;
-            
-            float error = State.HeadingError;
-            errorRate = error - prev_error;
-            filteredError = getFilteredError(abs(error));
-            
-            velocityRight = -_Kp_Right*error + _Kd_Right*errorRate;
-            velocityLeft = _Kp_Left*error - _Kd_Left*errorRate;
-            velocityRight = constrain(velocityRight, -30, 30);
-            velocityLeft = constrain(velocityLeft, -30, 30);
-            Serial.print("Velocity Right : ");
-            Serial.println(velocityRight);
-            Serial.print("Velocity Left : ");
-            Serial.println(velocityLeft);
-            Serial.println("");
-
-            State.effectors.rightMotor.VelocityCmd(velocityRight); 
-            State.effectors.leftMotor.VelocityCmd(velocityLeft);
-   
+        case TURN_RIGHT_CL:
+            if(_firstPass){
+                State.effectors.rightMotor.BwdPositionCmd(305); 
+                State.effectors.leftMotor.FwdPositionCmd(305); 
+                _firstPass=false;
+            }
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
 
-            //if(filteredError <= 5.0){
             if (State.effectors.leftMotor.ReachedPosition() && 
-                State.effectors.rightMotor.ReachedPosition())
-                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
-                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
-            //}
-            
-            //_testDriveState = TURN_RIGHT_TEST;
-            prev_error = error;
-        break;    
+                State.effectors.rightMotor.ReachedPosition()) {
+                _firstPass = true;
+                _testDriveState = DRIVE_FWD_CL;
+            }
+
+        break;
+
     }
 }

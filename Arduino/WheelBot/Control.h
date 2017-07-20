@@ -26,7 +26,7 @@ class Control {
  public:
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
             _positionCmd(0.0), _Kp(5.0), _Kd(0.5), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
-            Mode(IDLE), _testDriveState(HEADING_CONTROL_TEST), _numSecondsInTest(0.0), _firstPass(true), errorRate(0.0), 
+            Mode(IDLE), _testDriveState(HEADING_CONTROL_TEST), _firstPass(true), errorRate(0.0), 
             velocityRight(0.0), velocityLeft(0.0), prev_error(0.0), _Kp_Left(0.0), _Kp_Right(0.0),_Kd_Right(0.0), _Kd_Left(0.0){};
 
     ~Control(){};
@@ -62,17 +62,13 @@ class Control {
       TEST_DRIVE          = 3
     }ControlMode;
     ControlMode Mode;
-	// Moding used for a test drive
-	enum TestDriveRoute
-	{
-	    FWD_POS_TEST = 0,
-	    TURN_RIGHT_TEST = 1,
-	    SPEED_UP_VEL_TEST = 2,
-      SLOW_DOWN_VEL_TEST = 3,
-      HEADING_CONTROL_TEST = 4 
-  };
-    TestDriveRoute _testDriveState;
-    float _numSecondsInTest;
+    enum TestDriveRoute
+    {
+        DRIVE_FWD_OL       = 0,
+        TURN_RIGHT_OL      = 1,
+        DRIVE_FWD_CL       = 2,
+        TURN_RIGHT_CL      = 3  
+    } _testDriveState;
     bool _firstPass;
     float errorRate;
     float velocityRight;
