@@ -50,9 +50,9 @@ class Spg30MotorDriver {
   enum MotorSpeeds
   {
       STOP         = 0,
-      VEL_LOW      = 100,
-      VEL_MEDIUM   = 200,
-      VEL_HIGH     = 255
+      VEL_LOW      = 15,
+      VEL_MEDIUM   = 20,
+      VEL_HIGH     = 28
   };
   /// @brief The motor speed used for position control.
   /// @note  This is irrelevant for velocity control.

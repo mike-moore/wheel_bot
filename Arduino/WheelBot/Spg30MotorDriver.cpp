@@ -100,16 +100,14 @@ void Spg30MotorDriver::_positionControl(){
 }
 
 void Spg30MotorDriver::_motorForward(){
-   analogWrite(_pwmPin, MotorSpeed);
-   digitalWrite(_motorPinA1, LOW);
-   digitalWrite(_motorPinB1, HIGH);
+   _velocityCmd = MotorSpeed;
+   _pidControl();
    _motorIsRunning = true;
 }
 
 void Spg30MotorDriver::_motorBackward(){
-   analogWrite(_pwmPin, MotorSpeed);
-   digitalWrite(_motorPinA1, HIGH);
-   digitalWrite(_motorPinB1, LOW);
+   _velocityCmd = -MotorSpeed;
+   _pidControl();
    _motorIsRunning = true;
 }
 

@@ -1,5 +1,5 @@
 Name,Heading,Distance
-Waypoint A, 0.0, 1.0
-Waypoint B, -90.0, 1.5
-Waypoint C, 90.0, 3.5
-Waypoint D, 0.0, -4.5
+Waypoint A, 0.0, 0.75
+Waypoint B, 90.0, 0.75
+Waypoint C, 90.0, 0.75
+Waypoint D, 90.0, 0.75
