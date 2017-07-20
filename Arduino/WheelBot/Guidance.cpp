@@ -15,7 +15,7 @@ void Guidance::Execute() {
                 way_point = State.WayPointQueue.pop();
                 /// - Set the active way point and move to trackind mode.
                 strncpy(State.ActiveWayPoint.Name, way_point.Name, 15);
-                //State.ActiveWayPoint.Heading = way_point.Heading; 
+                State.ActiveWayPoint.Heading = way_point.Heading; 
                 State.ActiveWayPoint.Distance = way_point.Distance; 
                 Serial.print("Tracking to new waypoint : ");
                 Serial.println(State.ActiveWayPoint.Name);
