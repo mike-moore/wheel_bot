@@ -50,7 +50,7 @@ void Control::Execute() {
             _testDrive();
             if (!State.DoTestDrive){
                 Mode = IDLE;
-                _testDriveState = FWD_POS_TEST;
+                _testDriveState = DRIVE_FWD_OL;
             }
 
         break;
@@ -147,7 +147,7 @@ void Control::_printHeadingDebug(){
   if((millis()-_lastMilliPrint) >= 2000){                     
         _lastMilliPrint = millis();
         Serial.print("Current heading : ");
-        Serial.println(State.FilteredSensedHeading);
+        Serial.println(State.SensedHeading);
         Serial.print("Desired heading : ");
         Serial.println(State.ActiveWayPoint.Heading);
         Serial.print("Velocity Cmd : ");

@@ -45,7 +45,7 @@ class Control {
     void _printDistanceDebug();
     void _performRotationControl();
     void _testDrive();
-    float _pdHeadingControl();
+    void _pdHeadingControl();
     RobotState& State;
     float _velocityCmd;
     float _positionCmd;

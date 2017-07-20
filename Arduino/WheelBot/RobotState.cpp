@@ -3,7 +3,7 @@
 RobotState::RobotState() 
  :
  effectors(),
- FilteredSensedHeading(0.0),
+ SensedHeading(0.0),
  SensedDistance(0.0),
  ActiveWayPoint(),
  WayPointQueue(),

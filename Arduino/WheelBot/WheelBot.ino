@@ -53,7 +53,6 @@ void setup(){
   serialComm.InitHw();
   // - Very Important: attach interrupt service routines for motor encoders
   setup_encoders();
-  robotState.DoTestDrive = true;
 }
 
 void setup_encoders(){

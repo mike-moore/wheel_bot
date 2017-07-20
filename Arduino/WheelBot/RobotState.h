@@ -36,7 +36,7 @@ class RobotState {
   RobotEffectors effectors;
 
   /// - Sensor readings
-  float FilteredSensedHeading;
+  float SensedHeading;
   float SensedDistance;
   
   /// - Robot guidance
