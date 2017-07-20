@@ -150,8 +150,8 @@ void Control::_testDrive(){
 
         case TURN_RIGHT_OL:
             if(_firstPass){
-                State.effectors.rightMotor.BwdPositionCmd(620); 
-                State.effectors.leftMotor.FwdPositionCmd(620); 
+                State.effectors.rightMotor.BwdPositionCmd(650); 
+                State.effectors.leftMotor.FwdPositionCmd(650); 
                 _firstPass=false;
             }
             State.effectors.rightMotor.run();
@@ -177,6 +177,8 @@ void Control::_testDrive(){
         case DRIVE_FWD_CL:
             if(_firstPass){
                 State.ClosedLoopControl = true;
+                State.effectors.rightMotor.ClosedLoopControl = true;
+                State.effectors.leftMotor.ClosedLoopControl = true;
                 State.effectors.rightMotor.FwdPositionCmd(720); 
                 State.effectors.leftMotor.FwdPositionCmd(720); 
                 _firstPass=false;
@@ -191,39 +193,18 @@ void Control::_testDrive(){
         break;
 
         case TURN_RIGHT_CL:
-            float velocity_right = 0.0;
-            float velocity_left = 0.0;
-            float error_rate = 0.0;
             if(_firstPass){
+                State.effectors.rightMotor.BwdPositionCmd(610); 
+                State.effectors.leftMotor.FwdPositionCmd(610); 
                 _firstPass=false;
-                _cmdHeading = State.SensedHeading + 180.0;
-                _errorAccum = 0.0;
-                State.AverageHeadingError = _cmdHeading - State.SensedHeading;
             }
-            State.HeadingError = _cmdHeading - State.SensedHeading;
-            if (State.HeadingError > 180.0){
-              State.HeadingError -= 360.0;
-            }
-            if (State.HeadingError < -180.0){
-              State.HeadingError += 360.0;
-            }
-            _errorAccum += State.HeadingError;
-            error_rate = State.HeadingError - _prevError;
-            _prevError = State.HeadingError;
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
 
-            velocity_right = -_Kp_Right*State.HeadingError - _Ki_Right*_errorAccum + _Kd_Right*error_rate;
-            velocity_left = _Kp_Left*State.HeadingError + _Ki_Left*_errorAccum - _Kd_Left*error_rate;
-
-            if (abs(State.AverageHeadingError) > State.HeadingErrorTol) {
-                State.effectors.rightMotor.VelocityCmd(velocity_right); 
-                State.effectors.leftMotor.VelocityCmd(velocity_left);
-                State.effectors.rightMotor.run();
-                State.effectors.leftMotor.run();
-            }else{
-                State.effectors.rightMotor.MotorBrake(); 
-                State.effectors.leftMotor.MotorBrake();
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition()) {
                 _firstPass = true;
-                _testDriveState = DRIVE_FWD_CL;
+                _testDriveState = DRIVE_FWD_OL;
                 _TurnRightCount++;
             }
 
@@ -233,6 +214,8 @@ void Control::_testDrive(){
                 _testDriveState = DRIVE_FWD_OL;
                  State.DoTestDrive = false;
                  State.ClosedLoopControl = false;
+                State.effectors.rightMotor.ClosedLoopControl = false;
+                State.effectors.leftMotor.ClosedLoopControl = false;
             }
 
         break;

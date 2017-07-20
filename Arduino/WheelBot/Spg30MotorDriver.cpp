@@ -4,6 +4,7 @@ Spg30MotorDriver::Spg30MotorDriver(uint_least8_t motorPinA1,
                    uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long & encoderCount, int & motorSpeed) :
     ControlMode(IDLE),
     MotorSpeed(VEL_HIGH),
+    ClosedLoopControl(false),
     _motorPinA1(motorPinA1),
     _motorPinB1(motorPinB1),
     _pwmPin(pwmPin),
@@ -100,14 +101,26 @@ void Spg30MotorDriver::_positionControl(){
 }
 
 void Spg30MotorDriver::_motorForward(){
-   _velocityCmd = MotorSpeed;
-   _pidControl();
+   if (ClosedLoopControl){
+       _velocityCmd = MotorSpeed;
+       _pidControl();
+   }else{
+       analogWrite(_pwmPin, 255);
+       digitalWrite(_motorPinA1, LOW);
+       digitalWrite(_motorPinB1, HIGH);
+   }
    _motorIsRunning = true;
 }
 
 void Spg30MotorDriver::_motorBackward(){
-   _velocityCmd = -MotorSpeed;
-   _pidControl();
+   if (ClosedLoopControl){
+       _velocityCmd = -MotorSpeed;
+       _pidControl();
+   }else{
+       analogWrite(_pwmPin, 255);
+       digitalWrite(_motorPinA1, HIGH);
+       digitalWrite(_motorPinB1, LOW);
+   }
    _motorIsRunning = true;
 }
 

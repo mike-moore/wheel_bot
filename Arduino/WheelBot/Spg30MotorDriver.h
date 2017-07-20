@@ -68,6 +68,7 @@ class Spg30MotorDriver {
   /// @brief Functions the user can call to see if their commanded
   ///        position and velocity have been reached.
   bool ReachedPosition();
+  bool ClosedLoopControl;
  private:
   void _pidControl();
   void _updatePid();
