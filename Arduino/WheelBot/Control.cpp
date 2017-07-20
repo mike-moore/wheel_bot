@@ -150,8 +150,8 @@ void Control::_testDrive(){
 
         case TURN_RIGHT_OL:
             if(_firstPass){
-                State.effectors.rightMotor.BwdPositionCmd(650); 
-                State.effectors.leftMotor.FwdPositionCmd(650); 
+                State.effectors.rightMotor.BwdPositionCmd(630); 
+                State.effectors.leftMotor.FwdPositionCmd(630); 
                 _firstPass=false;
             }
             State.effectors.rightMotor.run();
@@ -214,6 +214,7 @@ void Control::_testDrive(){
                 _testDriveState = DRIVE_FWD_OL;
                  State.DoTestDrive = false;
                  State.ClosedLoopControl = false;
+                 Mode = IDLE;
                 State.effectors.rightMotor.ClosedLoopControl = false;
                 State.effectors.leftMotor.ClosedLoopControl = false;
             }

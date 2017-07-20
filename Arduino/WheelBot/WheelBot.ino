@@ -51,9 +51,10 @@ bool mtrR_A_set, mtrR_B_set;
 void setup(){
   // - Serial comm init
   serialComm.InitHw();
-  navigation.InitSensors();
+  //navigation.InitSensors();
   // - Very Important: attach interrupt service routines for motor encoders
   setup_encoders();
+  robotState.DoTestDrive = true;
 }
 
 void setup_encoders(){
