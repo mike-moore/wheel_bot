@@ -27,7 +27,8 @@ class Control {
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
             _positionCmd(0.0), _Kp(5.0), _Kd(0.5), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
             Mode(IDLE), _testDriveState(DRIVE_FWD_OL), _firstPass(true), errorRate(0.0), 
-            velocityRight(0.0), velocityLeft(0.0), prev_error(0.0), _Kp_Left(0.0), _Kp_Right(0.0),_Kd_Right(0.0), _Kd_Left(0.0){};
+            velocityRight(0.0), velocityLeft(0.0), prev_error(0.0), _Kp_Left(0.0), _Kp_Right(0.0),_Kd_Right(0.0), _Kd_Left(0.0),
+            _TurnRightCount(0){};
 
     ~Control(){};
 
@@ -78,6 +79,7 @@ class Control {
     float _Kp_Right;
     float _Kd_Right;
     float _Kd_Left;
+    uint16_t _TurnRightCount;
 };
   
 
