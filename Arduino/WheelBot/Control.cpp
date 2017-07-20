@@ -193,7 +193,6 @@ void Control::_testDrive(){
                 State.effectors.rightMotor.BwdPositionCmd(305); 
                 State.effectors.leftMotor.FwdPositionCmd(305); 
                 _firstPass=false;
-                _TurnRightCount = 0;
             }
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
@@ -205,8 +204,9 @@ void Control::_testDrive(){
                 _TurnRightCount++;
             }
 
-            // - Swap over to closed loop after 12 right turns
-            if (_TurnRightCount > 12){
+            // - Swap over to closed loop after 8 right turns
+            if (_TurnRightCount >= 8){
+                _TurnRightCount = 0;
                 _firstPass = true;
                 _testDriveState = DRIVE_FWD_CL;
             }
@@ -233,7 +233,6 @@ void Control::_testDrive(){
                 State.effectors.rightMotor.BwdPositionCmd(305); 
                 State.effectors.leftMotor.FwdPositionCmd(305); 
                 _firstPass=false;
-                _TurnRightCount = 0;
             }
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
@@ -245,8 +244,9 @@ void Control::_testDrive(){
                 _TurnRightCount++;
             }
             // - Stop test drive after 8 closed loop right turns
-            if (_TurnRightCount > 8){
+            if (_TurnRightCount >= 8){
                 _firstPass = true;
+                _TurnRightCount = 0;
                 _testDriveState = DRIVE_FWD_OL;
                  State.DoTestDrive = false;
             }
