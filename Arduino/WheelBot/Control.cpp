@@ -86,40 +86,6 @@ void Control::_checkForHeadingControl(){
     }
 }
 
-void Control::_pdHeadingControl(){
-    float filteredError = 0.0;
-
-    _Kp_Left = 0.45;
-    _Kp_Right = 0.506;
-    _Kd_Left = 0.05; 
-    _Kd_Right = 0.05;
-            
-    float error = State.HeadingError;
-    errorRate = error - prev_error;
-    filteredError = getFilteredError(abs(error));
-            
-    velocityRight = -_Kp_Right*error + _Kd_Right*errorRate;
-    velocityLeft = _Kp_Left*error - _Kd_Left*errorRate;
-    velocityRight = constrain(velocityRight, -30, 30);
-    velocityLeft = constrain(velocityLeft, -30, 30);
-
-    prev_error = error;
-    return;
-}
-
-float Control::getFilteredError(float error){
-    float sum = 0.0;
-    for (int i = 0; i < SIZE_ERROR_BUFFER-1; i++){
-        errorBuffer[i+1] = errorBuffer[i];
-    }
-    errorBuffer[0] = error;
-
-    for (int i = 0; i < SIZE_ERROR_BUFFER; i++){
-            sum += errorBuffer[i];
-    }
-    return sum/SIZE_ERROR_BUFFER;
-}
-   
 void Control::_checkForDistanceControl(){
    if (_distanceError()){
         uint16_t pos_cmd = 0;
@@ -162,12 +128,6 @@ void Control::_printDistanceDebug(){
     Serial.println(State.DistanceError);
     Serial.print("Position Cmd : ");
     Serial.println(_positionCmd);
-}
-
-void Control::_performRotationControl(){
-    float error = abs(State.HeadingError);
-    _velocityCmd += _Kp*error + _Kd*error;
-    _velocityCmd = constrain(_velocityCmd, -30, 30);
 }
 
 void Control::_testDrive(){
@@ -215,6 +175,8 @@ void Control::_testDrive(){
 
         case DRIVE_FWD_CL:
             if(_firstPass){
+                State.sensors.magnetometer.Init();
+                State.ClosedLoopControl = true;
                 State.effectors.rightMotor.FwdPositionCmd(720); 
                 State.effectors.leftMotor.FwdPositionCmd(720); 
                 _firstPass=false;
@@ -229,26 +191,41 @@ void Control::_testDrive(){
         break;
 
         case TURN_RIGHT_CL:
+            float error_rate = 0.0;
+            float velocity_right = 0.0;
+            float velocity_left = 0.0;
+            float cmd_heading = 0.0;
             if(_firstPass){
-                State.effectors.rightMotor.BwdPositionCmd(305); 
-                State.effectors.leftMotor.FwdPositionCmd(305); 
                 _firstPass=false;
+                cmd_heading = State.SensedHeading + 90.0;
             }
-            State.effectors.rightMotor.run();
-            State.effectors.leftMotor.run();
 
-            if (State.effectors.leftMotor.ReachedPosition() && 
-                State.effectors.rightMotor.ReachedPosition()) {
+            State.HeadingError = cmd_heading - State.SensedHeading;
+            error_rate = State.HeadingError - _prevError;
+            _prevError = State.HeadingError;
+
+            velocity_right = -_Kp_Right*State.HeadingError + _Kd_Right*error_rate;
+            velocity_left = _Kp_Left*State.HeadingError - _Kd_Left*error_rate;
+
+            if (_headingError()) {
+                State.effectors.rightMotor.VelocityCmd(velocity_right); 
+                State.effectors.leftMotor.VelocityCmd(velocity_left);
+                State.effectors.rightMotor.run();
+                State.effectors.leftMotor.run();
+            }else{
+                State.effectors.rightMotor.MotorBrake(); 
+                State.effectors.leftMotor.MotorBrake();
                 _firstPass = true;
                 _testDriveState = DRIVE_FWD_CL;
                 _TurnRightCount++;
             }
+
             // - Stop test drive after 8 closed loop right turns
             if (_TurnRightCount >= 8){
-                _firstPass = true;
                 _TurnRightCount = 0;
                 _testDriveState = DRIVE_FWD_OL;
                  State.DoTestDrive = false;
+                 State.ClosedLoopControl = false;
             }
 
         break;

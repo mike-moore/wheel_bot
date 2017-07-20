@@ -25,16 +25,13 @@
 class Control { 
  public:
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
-            _positionCmd(0.0), _Kp(5.0), _Kd(0.5), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
-            Mode(IDLE), _testDriveState(DRIVE_FWD_OL), _firstPass(true), errorRate(0.0), 
-            velocityRight(0.0), velocityLeft(0.0), prev_error(0.0), _Kp_Left(0.0), _Kp_Right(0.0),_Kd_Right(0.0), _Kd_Left(0.0),
-            _TurnRightCount(0){};
+            _positionCmd(0.0), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
+            Mode(IDLE), _testDriveState(DRIVE_FWD_OL), _firstPass(true), _prevError(0.0), _Kp_Left(0.45), _Kp_Right(0.506),
+            _Kd_Right(0.05), _Kd_Left(0.05), _TurnRightCount(0){};
 
     ~Control(){};
 
     void Execute();
-    float getFilteredError(float error);
-    float errorBuffer[SIZE_ERROR_BUFFER];
 
  private:
     bool _headingError();
@@ -46,12 +43,9 @@ class Control {
     void _printDistanceDebug();
     void _performRotationControl();
     void _testDrive();
-    void _pdHeadingControl();
     RobotState& State;
     float _velocityCmd;
     float _positionCmd;
-    float _Kp;
-    float _Kd;
     uint16_t MotorRotDegPerFt;
     float MotorRotDegPerDegHeading;
     unsigned long _lastMilliPrint;
@@ -71,10 +65,7 @@ class Control {
         TURN_RIGHT_CL      = 3  
     } _testDriveState;
     bool _firstPass;
-    float errorRate;
-    float velocityRight;
-    float velocityLeft;
-    float prev_error;
+    float _prevError;
     float _Kp_Left;
     float _Kp_Right;
     float _Kd_Right;

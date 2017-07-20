@@ -49,6 +49,7 @@ class RobotState {
 
   /// - Robot control
   float ControlSignal;
+  bool ClosedLoopControl;
   bool DoTestDrive;
   bool HeadingReached;
   bool DistanceReached;

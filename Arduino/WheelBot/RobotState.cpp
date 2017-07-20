@@ -12,6 +12,7 @@ RobotState::RobotState()
  DistanceError(0.0),
  DistanceErrorTol(0.25),
  ControlSignal(0.0),
+ ClosedLoopControl(false),
  HeadingReached(true),
  DistanceReached(true)
 {

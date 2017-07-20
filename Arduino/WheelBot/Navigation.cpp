@@ -1,16 +1,17 @@
 #include "Navigation.h"
 
 void Navigation::InitSensors() {
-    State.sensors.magnetometer.Init();
     for (int i = 0; i < SIZE_HEADING_BUFFER; i++){
         sensedHeadingBuffer[i] = 0.0;
     }    
 }
 
 void Navigation::Execute() {
-    //float sensedHeading = State.sensors.magnetometer.ReadHeading();
-    //State.FilteredSensedHeading = getFilteredHeading(sensedHeading);
-    State.SensedHeading  = 0.0;
+    float sensedHeading = 0.0;
+    if (State.ClosedLoopControl){
+        sensedHeading = State.sensors.magnetometer.ReadHeading();
+    }
+    State.SensedHeading = getFilteredHeading(sensedHeading);
     State.SensedDistance = 0.0;
 }
 
