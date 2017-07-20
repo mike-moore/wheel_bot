@@ -52,7 +52,7 @@ class Spg30MotorDriver {
       STOP         = 0,
       VEL_LOW      = 15,
       VEL_MEDIUM   = 20,
-      VEL_HIGH     = 28
+      VEL_HIGH     = 23
   };
   /// @brief The motor speed used for position control.
   /// @note  This is irrelevant for velocity control.
