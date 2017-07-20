@@ -11,7 +11,7 @@ class RobotTerminal(Cmd):
 
     def __init__(self):
         Cmd.__init__(self)
-        self.portName = "/dev/ttyUSB0"
+        self.portName = "/dev/tty.usbserial-A501DF8K"
         self.serialComm = SerialCommunication(self.portName)
 
     def do_exit(self, args):

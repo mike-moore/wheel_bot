@@ -150,8 +150,8 @@ void Control::_testDrive(){
 
         case TURN_RIGHT_OL:
             if(_firstPass){
-                State.effectors.rightMotor.BwdPositionCmd(305); 
-                State.effectors.leftMotor.FwdPositionCmd(305); 
+                State.effectors.rightMotor.BwdPositionCmd(620); 
+                State.effectors.leftMotor.FwdPositionCmd(620); 
                 _firstPass=false;
             }
             State.effectors.rightMotor.run();
@@ -196,7 +196,7 @@ void Control::_testDrive(){
             float error_rate = 0.0;
             if(_firstPass){
                 _firstPass=false;
-                _cmdHeading = State.SensedHeading + 90.0;
+                _cmdHeading = State.SensedHeading + 180.0;
                 _errorAccum = 0.0;
                 State.AverageHeadingError = _cmdHeading - State.SensedHeading;
             }
