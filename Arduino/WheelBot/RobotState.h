@@ -43,6 +43,7 @@ class RobotState {
   WayPoint ActiveWayPoint;
   QueueList <WayPoint> WayPointQueue;
   float HeadingError;
+  float AverageHeadingError;
   float HeadingErrorTol;
   float DistanceError;
   float DistanceErrorTol;

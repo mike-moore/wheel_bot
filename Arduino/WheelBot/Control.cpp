@@ -211,13 +211,7 @@ void Control::_testDrive(){
             velocity_right = -_Kp_Right*State.HeadingError + _Kd_Right*error_rate;
             velocity_left = _Kp_Left*State.HeadingError - _Kd_Left*error_rate;
 
-            if (_headingError()) {
-                Serial.print("Command Heading : ");
-                Serial.println(_cmdHeading);
-                Serial.print("Sensed Heading : ");
-                Serial.println(State.SensedHeading);
-                Serial.print("Heading error : ");
-                Serial.println(State.HeadingError);
+            if (abs(State.AverageHeadingError) > State.HeadingErrorTol) {
                 State.effectors.rightMotor.VelocityCmd(velocity_right); 
                 State.effectors.leftMotor.VelocityCmd(velocity_left);
                 State.effectors.rightMotor.run();

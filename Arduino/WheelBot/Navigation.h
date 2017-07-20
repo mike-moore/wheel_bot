@@ -16,6 +16,7 @@
 #include "RobotState.h"
 
 #define SIZE_HEADING_BUFFER 20
+#define SIZE_ERROR_BUFFER 20
 
 ///////////////////////////////////////////////////////////////
 /// @class Navigation
@@ -34,6 +35,7 @@ class Navigation {
 
  private:
     RobotState& State;
+    float _errorBuffer[SIZE_ERROR_BUFFER];
 };
   
 

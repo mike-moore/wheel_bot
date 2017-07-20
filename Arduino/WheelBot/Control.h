@@ -15,8 +15,6 @@
 
 #include "RobotState.h"
 
-#define SIZE_ERROR_BUFFER 10
-
 ///////////////////////////////////////////////////////////////
 /// @class Control
 /// @ingroup WheelBot
