@@ -29,6 +29,20 @@ class SerialCommunication(object):
         except IOError:
             print "Waypoint command : " + str(name) + " failed."
 
+    def getHeading(self):
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        # Can use WP_GET_ACTIVE as the command. Heading is returned
+        # after every transmission (it's a required field)
+        get_heading_cmd = cmd_packet.RoverCmds.add()
+        get_heading_cmd.Id = WP_GET_ACTIVE
+        try:
+            heading = self.commandArduino(cmd_packet, max_cmd_attempts).MeasuredHeading
+            return heading
+        except IOError:
+            print "Get heading command failed."
+        return ""
+
     def getActiveWayPointName(self):
         max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
@@ -83,8 +97,8 @@ class SerialCommunication(object):
                     responseOk = False
             except IOError:
                 logging.info("Failed to send single packet :" + str(cmd))
-                #self.serialPort.flushInput()
-                #self.serialPort.flushOutput()
+                self.serialPort.flushInput()
+                self.serialPort.flushOutput()
                 num_failed_packets += 1
                 time.sleep(self.CommFrequency)
         if not responseOk:
