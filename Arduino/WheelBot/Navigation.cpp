@@ -12,10 +12,9 @@ void Navigation::Execute() {
     if (State.ClosedLoopControl){
         //sensedHeading = State.sensors.magnetometer.ReadHeading();
     }
-    State.SensedHeading = getFilteredHeading(sensedHeading);
-    avgError();
-    Serial.print("Average heading error : ");
-    Serial.println(State.AverageHeadingError);
+    State.SensedHeading = State.sensors.magnetometer.ReadHeading();
+//    State.SensedHeading = getFilteredHeading(sensedHeading);
+    //avgError();
     State.SensedDistance = 0.0;
 }
 

@@ -51,10 +51,9 @@ bool mtrR_A_set, mtrR_B_set;
 void setup(){
   // - Serial comm init
   serialComm.InitHw();
-  //navigation.InitSensors();
+  navigation.InitSensors();
   // - Very Important: attach interrupt service routines for motor encoders
   setup_encoders();
-  robotState.DoTestDrive = true;
 }
 
 void setup_encoders(){
@@ -88,23 +87,23 @@ void loop(){
     navigation.Execute();
   }
 
-  /// - Guidance
-  if (currentMillis - previousMillisGuidance >= cycleTimeGuidance) {
-    previousMillisGuidance = currentMillis;
-    guidance.Execute();
-  }
+  // /// - Guidance
+  // if (currentMillis - previousMillisGuidance >= cycleTimeGuidance) {
+  //   previousMillisGuidance = currentMillis;
+  //   guidance.Execute();
+  // }
 
-  /// - Compute motor rpms
-  if (currentMillis - previousMillisRpmCompute >= cycleTimeRpmCompute) {
-    previousMillisRpmCompute = currentMillis;
-    computeMotorSpeeds();
-  }
+  // /// - Compute motor rpms
+  // if (currentMillis - previousMillisRpmCompute >= cycleTimeRpmCompute) {
+  //   previousMillisRpmCompute = currentMillis;
+  //   computeMotorSpeeds();
+  // }
   
-  /// - Control
-  if (currentMillis - previousMillisControl >= cycleTimeControl) {
-    previousMillisControl = currentMillis;
-    control.Execute();
-  }
+  // /// - Control
+  // if (currentMillis - previousMillisControl >= cycleTimeControl) {
+  //   previousMillisControl = currentMillis;
+  //   control.Execute();
+  // }
 
   /// - Comm Tx
   if (currentMillis - previousMillisCommTx >= cycleTimeCommTx) {

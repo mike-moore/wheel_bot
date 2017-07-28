@@ -164,11 +164,11 @@ void Control::_testDrive(){
                 _TurnRightCount++;
             }
 
-            // - Swap over to closed loop after 3 turns
-            if (_TurnRightCount >= 3){
+            // - Swap over to closed loop after 2 turns
+            if (_TurnRightCount >= 2){
                 _TurnRightCount = 0;
                 _firstPass = true;
-                delay(5000);
+                delay(10000);
                 _testDriveState = DRIVE_FWD_CL;
             }
 
@@ -208,8 +208,8 @@ void Control::_testDrive(){
                 _TurnRightCount++;
             }
 
-            // - Stop test drive after 3 closed loop turns
-            if (_TurnRightCount >= 3){
+            // - Stop test drive after 2 closed loop turns
+            if (_TurnRightCount >= 2){
                 _TurnRightCount = 0;
                 _testDriveState = DRIVE_FWD_OL;
                  State.DoTestDrive = false;
