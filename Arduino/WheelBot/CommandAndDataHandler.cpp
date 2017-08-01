@@ -14,7 +14,7 @@ void CommandAndDataHandler::ProcessCmds() {
     ClearTelemetry();
     /// - Iterate over and process any rover commands that were sent
     for (uint_least8_t indx = 0; indx < Commands.RoverCmds_count; indx++){
-        Serial.println("Processing New Rover Command Received ... ");
+        //Serial.println("Processing New Rover Command Received ... ");
         ProcessRoverCmd(Commands.RoverCmds[indx]);
     }
     /// - Process the way point command if it was sent and valid
@@ -45,7 +45,7 @@ void CommandAndDataHandler::LoadTelemetry() {
 
 void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
     if (rover_cmd.Id == DO_TEST_DRIVE){
-        Serial.println("STARTING TEST DRIVE");
+        //Serial.println("STARTING TEST DRIVE");
         State.DoTestDrive = true;
         PackInt(CMD_ACCEPT);
     }
@@ -54,7 +54,7 @@ void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
         PackInt(CMD_ACCEPT);
     }
     if(rover_cmd.Id == WP_GET_ACTIVE){
-        Serial.println("WP GET ACTIVE");
+        //Serial.println("WP GET ACTIVE");
         PackInt(CMD_ACCEPT);
         strncpy(Telemetry.ActiveWayPoint, State.ActiveWayPoint.Name, 15);
         Telemetry.has_ActiveWayPoint = true;
@@ -64,11 +64,11 @@ void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
 void CommandAndDataHandler::ProcessWayPointCmd(WayPoint & way_point_cmd) {
     /// - Add the way point to the WayPointQueue
     if (State.WayPointQueue.count() < 15){
-        Serial.println("adding waypoint to the queue.");
+        //Serial.println("adding waypoint to the queue.");
         State.WayPointQueue.push(way_point_cmd);
         PackInt(CMD_ACCEPT);
     }else{
-        Serial.println("reject waypoint");
+        //Serial.println("reject waypoint");
         PackInt(CMD_REJECT);       
     }
 }
