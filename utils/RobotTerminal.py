@@ -15,8 +15,9 @@ class RobotTerminal(Cmd):
 
     def __init__(self):
         Cmd.__init__(self)
-        self.portName = "/dev/ttyUSB1"
+        self.portName = "/dev/ttyACM1"
         self.serialComm = SerialCommunication(self.portName)
+        self.serialComm.CommFrequency = 0.04
 
     def do_exit(self, args):
         """Exits the terminal"""
@@ -56,9 +57,9 @@ class RobotTerminal(Cmd):
     def do_plot_heading(self, args):
         """ Gets the heading"""
         data = np.genfromtxt(args, delimiter=',', names=['heading'])
-        data = data[75:]
+#        data = data[75:]
         fft = abs(scipy.fft(data))
-        freqs = scipy.fftpack.fftfreq(data.size, 0.01)
+        freqs = scipy.fftpack.fftfreq(data.size, 0.04)
 
         fig1 = plt.figure(figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
         fig1_ax1 = fig1.add_subplot(211)
