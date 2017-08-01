@@ -100,10 +100,10 @@ void loop(){
   // }
   
   // /// - Control
-  // if (currentMillis - previousMillisControl >= cycleTimeControl) {
-  //   previousMillisControl = currentMillis;
-  //   control.Execute();
-  // }
+  if (currentMillis - previousMillisControl >= cycleTimeControl) {
+     previousMillisControl = currentMillis;
+     control.Execute();
+  }
 
   /// - Comm Tx
   if (currentMillis - previousMillisCommTx >= cycleTimeCommTx) {
