@@ -15,9 +15,8 @@ ProtobuffSerial::~ProtobuffSerial() {
 }
 
 void ProtobuffSerial::InitHw() {
-	mySerial.begin(57600);
     Serial.begin(57600);
-    while (!mySerial) {
+    while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB
     }
 }
@@ -32,10 +31,10 @@ bool ProtobuffSerial::CheckCmdFooter(){
 }
 
 int ProtobuffSerial::ReadPacket() {
-    int bytes_avail = mySerial.available();
+    int bytes_avail = Serial.available();
     if (bytes_avail) {
         for (int byteNumber = 0; byteNumber < bytes_avail; byteNumber++){
-            RxBuffer[RxByteCounter++] = mySerial.read();
+            RxBuffer[RxByteCounter++] = Serial.read();
         }
     }
     if(RxByteCounter >= 4){
@@ -52,10 +51,10 @@ int ProtobuffSerial::ReadPacket() {
 }
 
 void ProtobuffSerial::WritePacket() {
-    Serial.println("Tx'n these bytes back : ");
+    //Serial.println("Tx'n these bytes back : ");
     PrintHex8(TxBuffer, NumBytesToSend);
-    Serial.println("");
-    mySerial.write(TxBuffer, NumBytesToSend);
+    //Serial.println("");
+    Serial.write(TxBuffer, NumBytesToSend);
 }
 
 int ProtobuffSerial::Rx() {
@@ -65,13 +64,13 @@ int ProtobuffSerial::Rx() {
         ClearBuffersAndReset();
     }else if( rx_status == RX_PACKET_READY){
         if (!Decode()){
-            Serial.println("Attempting to decode : ");
+            //Serial.println("Attempting to decode : ");
             PrintHex8(RxBuffer, RxByteCounter);
-            Serial.print("Which is ");
-            Serial.print(RxByteCounter);
-            Serial.println(" bytes");
-            Serial.println("");
-            Serial.println("Decode FAIL");
+            //Serial.print("Which is ");
+            //Serial.print(RxByteCounter);
+            //Serial.println(" bytes");
+            //Serial.println("");
+            //Serial.println("Decode FAIL");
             ClearBuffersAndReset();
             rx_status = UNLOAD_FAIL;
         }else{
@@ -90,7 +89,7 @@ int ProtobuffSerial::Tx() {
     if (!TxReady){ return TX_PACKET_WAITING; }
     /// - Encode the telemetry.
     if (!Encode()){
-        Serial.println("Encode FAIL");
+        //Serial.println("Encode FAIL");
         ClearBuffersAndReset();
         return LOAD_FAIL;
     }
@@ -136,7 +135,7 @@ void ProtobuffSerial::ClearBuffers(){
 
 void ProtobuffSerial::ClearBuffersAndReset(){
 
-    Serial.println(" Resetting comm.");
+    //Serial.println(" Resetting comm.");
     ClearBuffers();
     RxByteCounter = 0;
     TxReady = false;
@@ -147,11 +146,11 @@ void ProtobuffSerial::ClearBuffersAndReset(){
 void ProtobuffSerial::PrintHex8(uint_least8_t *data, uint_least8_t length)
 {
     // prints 8-bit data in hex with leading zeroes
-    Serial.print("0x"); 
+    //Serial.print("0x"); 
     for (int i=0; i<length; i++) { 
-        if (data[i]<0x10) {Serial.print("0");} 
-        Serial.print(data[i],HEX); 
-        Serial.print(" "); 
+        //if (data[i]<0x10) {Serial.print("0");} 
+        //Serial.print(data[i],HEX); 
+        //Serial.print(" "); 
     }
 }
 

@@ -105,7 +105,7 @@ void Spg30MotorDriver::_motorForward(){
        _velocityCmd = MotorSpeed;
        _pidControl();
    }else{
-       analogWrite(_pwmPin, 255);
+       analogWrite(_pwmPin, 0);
        digitalWrite(_motorPinA1, LOW);
        digitalWrite(_motorPinB1, HIGH);
    }

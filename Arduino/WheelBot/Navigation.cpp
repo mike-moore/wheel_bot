@@ -8,7 +8,7 @@ void Navigation::InitSensors() {
 }
 
 void Navigation::Execute() {
-    float sensedHeading = 0.0;
+    //float sensedHeading = 0.0;
     if (State.ClosedLoopControl){
         //sensedHeading = State.sensors.magnetometer.ReadHeading();
     }

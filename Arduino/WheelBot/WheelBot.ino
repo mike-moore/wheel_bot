@@ -23,7 +23,7 @@ const long cycleTimeCommRx = 20;
 unsigned long previousMillisCommRx = 0;
 const long cycleTimeCommTx = 20;
 unsigned long previousMillisCommTx = 0;
-const long cycleTimeNav = 200;
+const long cycleTimeNav = 100;
 unsigned long previousMillisNav = 0;
 const long cycleTimeGuidance = 1000;
 unsigned long previousMillisGuidance = 0;
@@ -100,10 +100,10 @@ void loop(){
   // }
   
   // /// - Control
-  // if (currentMillis - previousMillisControl >= cycleTimeControl) {
-  //   previousMillisControl = currentMillis;
-  //   control.Execute();
-  // }
+  if (currentMillis - previousMillisControl >= cycleTimeControl) {
+     previousMillisControl = currentMillis;
+     control.Execute();
+  }
 
   /// - Comm Tx
   if (currentMillis - previousMillisCommTx >= cycleTimeCommTx) {

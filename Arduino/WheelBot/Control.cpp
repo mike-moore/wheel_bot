@@ -135,8 +135,8 @@ void Control::_testDrive(){
     {
         case DRIVE_FWD_OL:
             if(_firstPass){
-                State.effectors.rightMotor.FwdPositionCmd(720); 
-                State.effectors.leftMotor.FwdPositionCmd(720); 
+                State.effectors.rightMotor.FwdPositionCmd(60000); 
+                State.effectors.leftMotor.FwdPositionCmd(60000); 
                 _firstPass=false;
             }
             State.effectors.rightMotor.run();

@@ -14,7 +14,7 @@
 #define PROTOBUFFSERIAL_H
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include "pb_encode.h"
 #include "pb_decode.h"
 #include "comm_packet.pb.h"
@@ -52,7 +52,7 @@ class ProtobuffSerial {
   TelemetryPacket Telemetry;
 
  protected:
-  SoftwareSerial mySerial = SoftwareSerial(2,3);
+  //SoftwareSerial mySerial = SoftwareSerial(2,3);
   int ReadPacket();
   bool CheckCmdFooter();
   void WritePacket();
