@@ -24,7 +24,7 @@ void Control::Execute() {
             // - Monitor for manual drive command. 
             //   Initiates manual drive mode.
             if (State.ManualDriveMode){
-                Mode = MANUAL_DRIVE;
+                Mode = MANUAL_DRIVE_CTRL;
             }
         break;
 
@@ -60,7 +60,7 @@ void Control::Execute() {
 
         break;
 
-        case MANUAL_DRIVE:
+        case MANUAL_DRIVE_CTRL:
             State.effectors.leftMotor.VelocityCmd(State.CmdLeftMotorRpm);
             State.effectors.rightMotor.VelocityCmd(State.CmdRightMotorRpm);
             State.effectors.rightMotor.run();

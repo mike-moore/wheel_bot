@@ -2,6 +2,7 @@
 
 RobotState::RobotState() 
  :
+ sensors(),
  effectors(),
  SensedHeading(0.0),
  SensedDistance(0.0),
@@ -16,7 +17,8 @@ RobotState::RobotState()
  HeadingErrorTol(1.0),
  DistanceError(0.0),
  DistanceErrorTol(0.25),
- ControlSignal(0.0),
+ CmdLeftMotorRpm(0.0),
+ CmdRightMotorRpm(0.0),
  ClosedLoopControl(false),
  DoTestDrive(false),
  ManualDriveMode(false),
