@@ -15,8 +15,8 @@
 
 #include "RobotState.h"
 
-#define SIZE_HEADING_BUFFER 20
-#define SIZE_ERROR_BUFFER 20
+#define SIZE_HEADING_BUFFER 10
+#define SIZE_ERROR_BUFFER 10
 
 ///////////////////////////////////////////////////////////////
 /// @class Navigation

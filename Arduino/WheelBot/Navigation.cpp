@@ -9,12 +9,9 @@ void Navigation::InitSensors() {
 
 void Navigation::Execute() {
     float sensedHeading = 0.0;
-    if (State.ClosedLoopControl){
-        //sensedHeading = State.sensors.magnetometer.ReadHeading();
-    }
-    State.SensedHeading = State.sensors.magnetometer.ReadHeading();
-//    State.SensedHeading = getFilteredHeading(sensedHeading);
-    //avgError();
+    sensedHeading = State.sensors.magnetometer.ReadHeading();
+    State.SensedHeading = getFilteredHeading(sensedHeading);
+    avgError();
     State.SensedDistance = 0.0;
 }
 

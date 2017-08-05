@@ -150,8 +150,8 @@ void Control::_testDrive(){
 
         case TURN_RIGHT_OL:
             if(_firstPass){
-                State.effectors.rightMotor.BwdPositionCmd(630); 
-                State.effectors.leftMotor.FwdPositionCmd(630); 
+                State.effectors.rightMotor.BwdPositionCmd(648); 
+                State.effectors.leftMotor.FwdPositionCmd(648); 
                 _firstPass=false;
             }
             State.effectors.rightMotor.run();
@@ -194,8 +194,8 @@ void Control::_testDrive(){
 
         case TURN_RIGHT_CL:
             if(_firstPass){
-                State.effectors.rightMotor.BwdPositionCmd(610); 
-                State.effectors.leftMotor.FwdPositionCmd(610); 
+                State.effectors.rightMotor.BwdPositionCmd(648); 
+                State.effectors.leftMotor.FwdPositionCmd(648); 
                 _firstPass=false;
             }
             State.effectors.rightMotor.run();
@@ -204,7 +204,7 @@ void Control::_testDrive(){
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
                 _firstPass = true;
-                _testDriveState = DRIVE_FWD_OL;
+                _testDriveState = DRIVE_FWD_CL;
                 _TurnRightCount++;
             }
 
@@ -212,9 +212,9 @@ void Control::_testDrive(){
             if (_TurnRightCount >= 2){
                 _TurnRightCount = 0;
                 _testDriveState = DRIVE_FWD_OL;
-                 State.DoTestDrive = false;
-                 State.ClosedLoopControl = false;
-                 Mode = IDLE;
+                State.DoTestDrive = false;
+                State.ClosedLoopControl = false;
+                Mode = IDLE;
                 State.effectors.rightMotor.ClosedLoopControl = false;
                 State.effectors.leftMotor.ClosedLoopControl = false;
             }
