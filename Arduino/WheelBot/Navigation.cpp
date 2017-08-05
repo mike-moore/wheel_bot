@@ -8,14 +8,15 @@ void Navigation::InitSensors() {
 }
 
 void Navigation::Execute() {
-    //float sensedHeading = 0.0;
-    if (State.ClosedLoopControl){
-        //sensedHeading = State.sensors.magnetometer.ReadHeading();
-    }
-    State.SensedHeading = State.sensors.magnetometer.ReadHeading();
-//    State.SensedHeading = getFilteredHeading(sensedHeading);
-    //avgError();
+    float sensedHeading = 0.0;
+    sensedHeading = State.sensors.magnetometer.ReadHeading();
+    State.SensedHeading = getFilteredHeading(sensedHeading);
+    avgError();
     State.SensedDistance = 0.0;
+    State.LeftMotorCount = State.effectors.leftMotor.getCount();
+    State.RightMotorCount = State.effectors.rightMotor.getCount();
+    State.LeftMotorRpm = State.effectors.leftMotor.getSpeed();
+    State.RightMotorRpm = State.effectors.rightMotor.getSpeed();
 }
 
 float Navigation::getFilteredHeading(float sensedHeading){

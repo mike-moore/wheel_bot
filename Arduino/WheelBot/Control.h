@@ -5,8 +5,6 @@
 /// @author
 ///         $Author: Mike Moore $
 ///
-/// Contact: mike.moore@so.engineering
-///
 /// Created on: March 23 2017
 ///
 ///////////////////////////////////////////////////////////////
@@ -52,7 +50,8 @@ class Control {
       IDLE                = 0,
       ROTATIONAL_CTRL     = 1,
       TRANSLATIONAL_CTRL  = 2,
-      TEST_DRIVE          = 3
+      TEST_DRIVE          = 3,
+      MANUAL_DRIVE_CTRL   = 4
     }ControlMode;
     ControlMode Mode;
     enum TestDriveRoute

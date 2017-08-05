@@ -6,8 +6,6 @@
 /// @author
 ///         $Author: Mike Moore $
 ///
-/// Contact: michael.moore@nasa.gov
-///
 /// Created on: February 5 2017
 ///
 ///////////////////////////////////////////////////////////////
@@ -69,6 +67,10 @@ class Spg30MotorDriver {
   ///        position and velocity have been reached.
   bool ReachedPosition();
   bool ClosedLoopControl;
+  /// @brief Getters for encoder count and motor speed.
+  ///        Both represented as floats.
+  float getCount();
+  float getSpeed();
  private:
   void _pidControl();
   void _updatePid();
@@ -139,6 +141,15 @@ inline void Spg30MotorDriver::_cmdPosition(uint16_t positionCmd){
     _positionReached = false;
     ControlMode = POSITION;
   }
+}
+
+
+inline float Spg30MotorDriver::getCount(){
+  return (float) _encoderCount;
+}
+
+inline float Spg30MotorDriver::getSpeed(){
+  return _measuredSpeed;
 }
 
 #endif

@@ -91,6 +91,18 @@ class RobotTerminal(Cmd):
         if heading:
             print "The sensed heading is : " + str(heading)
 
+    def do_get_motor_data(self, args):
+        """ Gets the motor data"""
+        motor_data = self.serialComm.getMotorData()
+        if motor_data:
+            print "#################################################################"
+            print "# WheelBot Motor Data "
+            print "#################################################################"
+            print "Left motor count : " + str(motor_data["LeftMotorCount"])
+            print "Left motor RPM : " + str(motor_data["LeftMotorRpm"])
+            print "Right motor count : " + str(motor_data["RightMotorCount"])
+            print "Right motor RPM : " + str(motor_data["RightMotorRpm"])
+
     def do_get_active_waypoint(self, args):
         """ Gets the name of the active way point"""
         active_way_point_name = self.serialComm.getActiveWayPointName()
@@ -114,6 +126,33 @@ class RobotTerminal(Cmd):
     def do_stop_test_drive(self, args):
         """Sends a command to stop the test drive"""
         self.serialComm.stopTestDrive()
+
+    def do_manual_drive(self, args):
+        """Sends a command to start manual drive mode"""
+        self.serialComm.commandManualDrive()
+
+    def do_stop_manual_drive(self, args):
+        """Sends a command to stop manual drive mode"""
+        self.serialComm.stopManualDrive()
+
+    def do_command_motors(self):
+        try:
+            print "Desired Left Motor RPM : "
+            left_motor_rpm = float(raw_input())
+            print "Desired Right Motor RPM : "
+            right_motor_rpm = float(raw_input())
+        except ValueError:
+            print "Invalid motor commands. RPM commands must be floats."
+        self.serialComm.commandMotorRpms(left_motor_rpm, right_motor_rpm)
+
+    def do_command_motor_trajectory(self, args):
+        with open(args) as trajectory_file:
+            trajectory_reader = csv.DictReader(trajectory_file)
+            for row in trajectory_reader:
+                left_motor_rpm = float(row['Left Motor Rpm'])
+                right_motor_rpm = float(row['Right Motor Rpm'])
+                self.serialComm.commandMotorRpms(left_motor_rpm, right_motor_rpm)
+                sleep(1)
 
     def send_waypoint(self):
         try:

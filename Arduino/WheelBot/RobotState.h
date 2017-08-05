@@ -38,6 +38,10 @@ class RobotState {
   /// - Sensor readings
   float SensedHeading;
   float SensedDistance;
+  float LeftMotorCount;
+  float RightMotorCount;
+  float LeftMotorRpm;
+  float RightMotorRpm;
   
   /// - Robot guidance
   WayPoint ActiveWayPoint;
@@ -49,9 +53,11 @@ class RobotState {
   float DistanceErrorTol;
 
   /// - Robot control
-  float ControlSignal;
+  float CmdLeftMotorRpm;
+  float CmdRightMotorRpm;
   bool ClosedLoopControl;
   bool DoTestDrive;
+  bool ManualDriveMode;
   bool HeadingReached;
   bool DistanceReached;
 

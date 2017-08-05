@@ -43,6 +43,26 @@ class SerialCommunication(object):
             print "Get heading command failed."
         return ""
 
+    def getMotorData(self):
+        motor_data = {}
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        get_motor_data_cmd = cmd_packet.RoverCmds.add()
+        get_motor_data_cmd.Id = GET_MOTOR_DATA
+        try:
+            response = self.commandArduino(cmd_packet, max_cmd_attempts)
+            if response and len(response.RoverStatus) > 4:
+                motor_data["LeftMotorCount"] = response.RoverStatus[1].Value
+                motor_data["RightMotorCount"] = response.RoverStatus[2].Value
+                motor_data["LeftMotorRpm"] = response.RoverStatus[3].Value
+                motor_data["RightMotorRpm"] = response.RoverStatus[4].Value
+                return motor_data
+            else:
+                raise IOError
+        except IOError:
+            print "Get motor data command failed."
+        return None
+
     def getActiveWayPointName(self):
         max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
@@ -54,6 +74,43 @@ class SerialCommunication(object):
         except IOError:
             print "Get active waypoint command failed."
         return ""
+
+    def commandManualDrive(self):
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        manual_drive_cmd = cmd_packet.RoverCmds.add()
+        manual_drive_cmd.Id = MANUAL_DRIVE
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Manual drive command accepted."
+        except IOError:
+            print "Manual drive command failed."
+
+    def stopManualDrive(self):
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        manual_drive_cmd = cmd_packet.RoverCmds.add()
+        manual_drive_cmd.Id = MANUAL_DRIVE_STOP
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Stop manual drive command accepted."
+        except IOError:
+            print "Stop manual drive command failed."
+
+    def commandMotorRpms(self, leftMotorRpm, rightMotorRpm):
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        left_motor_rpm_cmd = cmd_packet.RoverCmds.add()
+        left_motor_rpm_cmd.Id = CMD_L_MOTOR_RPM
+        left_motor_rpm_cmd.Value = self.clamp(leftMotorRpm, -30.0, 30.0)
+        right_motor_rpm_cmd = cmd_packet.RoverCmds.add()
+        right_motor_rpm_cmd.Id = CMD_R_MOTOR_RPM
+        right_motor_rpm_cmd.Value = self.clamp(rightMotorRpm, -30.0, 30.0)
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Motor RPM command accepted."
+        except IOError:
+            print "Motor RPM command failed."
 
     def commandTestDrive(self):
         max_cmd_attempts = 20
@@ -146,3 +203,10 @@ class SerialCommunication(object):
             raise IOError
         return wb_tlm
 
+    def clamp(self, n, minn, maxn):
+        if n < minn:
+            return minn
+        elif n > maxn:
+            return maxn
+        else:
+            return n
