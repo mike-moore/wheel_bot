@@ -75,6 +75,43 @@ class SerialCommunication(object):
             print "Get active waypoint command failed."
         return ""
 
+    def commandManualDrive(self):
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        manual_drive_cmd = cmd_packet.RoverCmds.add()
+        manual_drive_cmd.Id = MANUAL_DRIVE
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Manual drive command accepted."
+        except IOError:
+            print "Manual drive command failed."
+
+    def stopManualDrive(self):
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        manual_drive_cmd = cmd_packet.RoverCmds.add()
+        manual_drive_cmd.Id = MANUAL_DRIVE_STOP
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Stop manual drive command accepted."
+        except IOError:
+            print "Stop manual drive command failed."
+
+    def commandMotorRpms(self, leftMotorRpm, rightMotorRpm):
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        left_motor_rpm_cmd = cmd_packet.RoverCmds.add()
+        left_motor_rpm_cmd.Id = CMD_L_MOTOR_RPM
+        left_motor_rpm_cmd.Value = self.clamp(leftMotorRpm, -30.0, 30.0)
+        right_motor_rpm_cmd = cmd_packet.RoverCmds.add()
+        right_motor_rpm_cmd.Id = CMD_R_MOTOR_RPM
+        right_motor_rpm_cmd.Value = self.clamp(rightMotorRpm, -30.0, 30.0)
+        try:
+            self.commandArduino(cmd_packet, max_cmd_attempts)
+            print "Motor RPM command accepted."
+        except IOError:
+            print "Motor RPM command failed."
+
     def commandTestDrive(self):
         max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()
@@ -166,3 +203,10 @@ class SerialCommunication(object):
             raise IOError
         return wb_tlm
 
+    def clamp(self, n, minn, maxn):
+        if n < minn:
+            return minn
+        elif n > maxn:
+            return maxn
+        else:
+            return n

@@ -50,7 +50,8 @@ class Control {
       IDLE                = 0,
       ROTATIONAL_CTRL     = 1,
       TRANSLATIONAL_CTRL  = 2,
-      TEST_DRIVE          = 3
+      TEST_DRIVE          = 3,
+      MANUAL_DRIVE        = 4
     }ControlMode;
     ControlMode Mode;
     enum TestDriveRoute

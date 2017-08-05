@@ -18,6 +18,8 @@ RobotState::RobotState()
  DistanceErrorTol(0.25),
  ControlSignal(0.0),
  ClosedLoopControl(false),
+ DoTestDrive(false),
+ ManualDriveMode(false),
  HeadingReached(true),
  DistanceReached(true)
 {

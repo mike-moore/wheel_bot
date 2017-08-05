@@ -53,9 +53,11 @@ class RobotState {
   float DistanceErrorTol;
 
   /// - Robot control
-  float ControlSignal;
+  float CmdLeftMotorRpm;
+  float CmdRightMotorRpm;
   bool ClosedLoopControl;
   bool DoTestDrive;
+  bool ManualDriveMode;
   bool HeadingReached;
   bool DistanceReached;
 

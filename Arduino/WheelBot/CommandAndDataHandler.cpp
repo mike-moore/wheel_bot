@@ -65,6 +65,34 @@ void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
         PackInt(CMD_ACCEPT);
         SendMotorRpms = true;
     }
+    if(rover_cmd.Id == MANUAL_DRIVE){
+        Serial.println("ENABLE MANUAL DRIVE MODE");
+        State.ManualDriveMode = true;
+        PackInt(CMD_ACCEPT);
+    }
+    if(rover_cmd.Id == MANUAL_DRIVE_STOP){
+        Serial.println("DISABLE MANUAL DRIVE MODE");
+        State.ManualDriveMode = false;
+        PackInt(CMD_ACCEPT);
+    }
+    if(rover_cmd.Id == CMD_L_MOTOR_RPM){
+        Serial.println("CMD L MOTOR RPM");
+        if (State.ManualDriveMode = true){
+            PackInt(CMD_ACCEPT);
+            State.CmdLeftMotorRpm = rover_cmd.Value;
+        }else{
+            PackInt(CMD_REJECT);
+        }
+    }
+    if(rover_cmd.Id == CMD_R_MOTOR_RPM){
+        Serial.println("CMD R MOTOR RPM");
+        if (State.ManualDriveMode = true){
+            PackInt(CMD_ACCEPT);
+            State.CmdRightMotorRpm = rover_cmd.Value;
+        }else{
+            PackInt(CMD_REJECT);
+        }
+    }
 }
 
 void CommandAndDataHandler::ProcessWayPointCmd(WayPoint & way_point_cmd) {

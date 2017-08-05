@@ -21,6 +21,11 @@ void Control::Execute() {
             if (State.DoTestDrive){
                 Mode = TEST_DRIVE;
             }
+            // - Monitor for manual drive command. 
+            //   Initiates manual drive mode.
+            if (State.ManualDriveMode){
+                Mode = MANUAL_DRIVE;
+            }
         break;
 
         case ROTATIONAL_CTRL:
@@ -51,6 +56,17 @@ void Control::Execute() {
             if (!State.DoTestDrive){
                 Mode = IDLE;
                 _testDriveState = DRIVE_FWD_OL;
+            }
+
+        break;
+
+        case MANUAL_DRIVE:
+            State.effectors.leftMotor.VelocityCmd(State.CmdLeftMotorRpm);
+            State.effectors.rightMotor.VelocityCmd(State.CmdRightMotorRpm);
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
+            if (!State.ManualDriveMode){
+                Mode = IDLE;
             }
 
         break;
