@@ -43,6 +43,26 @@ class SerialCommunication(object):
             print "Get heading command failed."
         return ""
 
+    def getMotorData(self):
+        motor_data = {}
+        max_cmd_attempts = 20
+        cmd_packet = comm_packet_pb2.CommandPacket()
+        get_motor_data_cmd = cmd_packet.RoverCmds.add()
+        get_motor_data_cmd.Id = GET_MOTOR_DATA
+        try:
+            response = self.commandArduino(cmd_packet, max_cmd_attempts)
+            if response and len(response.RoverStatus) > 4:
+                motor_data["LeftMotorCount"] = response.RoverStatus[1].Value
+                motor_data["RightMotorCount"] = response.RoverStatus[2].Value
+                motor_data["LeftMotorRpm"] = response.RoverStatus[3].Value
+                motor_data["RightMotorRpm"] = response.RoverStatus[4].Value
+                return motor_data
+            else:
+                raise IOError
+        except IOError:
+            print "Get motor data command failed."
+        return None
+
     def getActiveWayPointName(self):
         max_cmd_attempts = 20
         cmd_packet = comm_packet_pb2.CommandPacket()

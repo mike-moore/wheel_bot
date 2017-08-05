@@ -90,6 +90,18 @@ class RobotTerminal(Cmd):
         if heading:
             print "The sensed heading is : " + str(heading)
 
+    def do_get_motor_data(self, args):
+        """ Gets the motor data"""
+        motor_data = self.serialComm.getMotorData()
+        if motor_data:
+            print "#################################################################"
+            print "# WheelBot Motor Data "
+            print "#################################################################"
+            print "Left motor count : " + str(motor_data["LeftMotorCount"])
+            print "Left motor RPM : " + str(motor_data["LeftMotorRpm"])
+            print "Right motor count : " + str(motor_data["RightMotorCount"])
+            print "Right motor RPM : " + str(motor_data["RightMotorRpm"])
+
     def do_get_active_waypoint(self, args):
         """ Gets the name of the active way point"""
         active_way_point_name = self.serialComm.getActiveWayPointName()

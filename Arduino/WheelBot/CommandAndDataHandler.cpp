@@ -4,7 +4,8 @@ CommandAndDataHandler::CommandAndDataHandler(CommandPacket& commands, TelemetryP
  :
  Commands(commands),
  Telemetry(tlm),
- State(state)
+ State(state),
+ SendMotorRpms(false)
 {}
 
 CommandAndDataHandler::~CommandAndDataHandler() {}
@@ -59,6 +60,11 @@ void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
         strncpy(Telemetry.ActiveWayPoint, State.ActiveWayPoint.Name, 15);
         Telemetry.has_ActiveWayPoint = true;
     }
+    if(rover_cmd.Id == GET_MOTOR_DATA){
+        Serial.println("GET MOTOR DATA CMD");
+        PackInt(CMD_ACCEPT);
+        SendMotorRpms = true;
+    }
 }
 
 void CommandAndDataHandler::ProcessWayPointCmd(WayPoint & way_point_cmd) {
@@ -86,9 +92,12 @@ void CommandAndDataHandler::PackFloat(uint32_t id, float value) {
 }
 
 void CommandAndDataHandler::LoadRoverStatus() {
-    //if(SendResponseSignal){
-    //    PackFloat(RESPONSE_SIGNAL, State.ResponseSignal);
-    //    SendResponseSignal = false;
-    //}
+    if(SendMotorRpms){
+        PackFloat(L_MOTOR_COUNT, State.LeftMotorCount);
+        PackFloat(R_MOTOR_COUNT, State.RightMotorCount);
+        PackFloat(L_MOTOR_RPM, State.LeftMotorRpm);
+        PackFloat(R_MOTOR_RPM, State.RightMotorRpm);
+        SendMotorRpms = false;
+    }
 }
 

@@ -13,6 +13,10 @@ void Navigation::Execute() {
     State.SensedHeading = getFilteredHeading(sensedHeading);
     avgError();
     State.SensedDistance = 0.0;
+    State.LeftMotorCount = State.effectors.leftMotor.getCount();
+    State.RightMotorCount = State.effectors.rightMotor.getCount();
+    State.LeftMotorRpm = State.effectors.leftMotor.getSpeed();
+    State.RightMotorRpm = State.effectors.rightMotor.getSpeed();
 }
 
 float Navigation::getFilteredHeading(float sensedHeading){

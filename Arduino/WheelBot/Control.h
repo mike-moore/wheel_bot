@@ -5,8 +5,6 @@
 /// @author
 ///         $Author: Mike Moore $
 ///
-/// Contact: mike.moore@so.engineering
-///
 /// Created on: March 23 2017
 ///
 ///////////////////////////////////////////////////////////////

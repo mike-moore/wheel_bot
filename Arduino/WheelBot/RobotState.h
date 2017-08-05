@@ -38,6 +38,10 @@ class RobotState {
   /// - Sensor readings
   float SensedHeading;
   float SensedDistance;
+  float LeftMotorCount;
+  float RightMotorCount;
+  float LeftMotorRpm;
+  float RightMotorRpm;
   
   /// - Robot guidance
   WayPoint ActiveWayPoint;
