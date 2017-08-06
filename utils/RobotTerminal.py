@@ -15,7 +15,7 @@ class RobotTerminal(Cmd):
 
     def __init__(self):
         Cmd.__init__(self)
-        self.portName = "/dev/ttyACM1"
+        self.portName = "/dev/ttyUSB0"
         self.serialComm = SerialCommunication(self.portName)
         self.serialComm.CommFrequency = 0.04
 
@@ -135,7 +135,7 @@ class RobotTerminal(Cmd):
         """Sends a command to stop manual drive mode"""
         self.serialComm.stopManualDrive()
 
-    def do_command_motors(self):
+    def do_command_motors(self, args):
         try:
             print "Desired Left Motor RPM : "
             left_motor_rpm = float(raw_input())
@@ -176,7 +176,7 @@ class RobotTerminal(Cmd):
                 self.serialComm.sendWayPoint(way_point_name, way_point_heading, way_point_distance)
 
 if __name__ == '__main__':
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG, format='%(levelname)s:%(message)s')
+    logging.basicConfig(stream=sys.stderr, level=logging.ERROR, format='%(levelname)s:%(message)s')
     prompt = RobotTerminal()
     prompt.prompt = '>> '
     prompt.cmdloop('Welcome to the Robot Terminal. Type "help" to see a list of commands.')

@@ -74,8 +74,6 @@ void Spg30MotorDriver::_pidControl(){
 }
 
 void Spg30MotorDriver::_updatePid(){
-    float pidTerm = 0;
-    int error=0;
     if (_velocityCmd < 0.0){
         digitalWrite(_motorPinA1, HIGH);
         digitalWrite(_motorPinB1, LOW);                  
@@ -83,12 +81,8 @@ void Spg30MotorDriver::_updatePid(){
         digitalWrite(_motorPinA1, LOW);
         digitalWrite(_motorPinB1, HIGH);    
 	  }
-	error = abs(_velocityCmd) - abs(_measuredSpeed); 
-    error = constrain(error, -10, 10);
-    _errorAccum += error;
-    _errorAccum = constrain(_errorAccum, -150, 150);
-    pidTerm = _pwmLookup[abs(_velocityCmd)] + (_Kp * error) + (_Ki * _errorAccum);
-	_pwmCmd = constrain(int(pidTerm), 15, 255);
+    _pwmCmd = abs(_velocityCmd)*(255/30.0);
+	_pwmCmd = constrain(int(_pwmCmd), 0, 255);
 }
 
 void Spg30MotorDriver::_positionControl(){
