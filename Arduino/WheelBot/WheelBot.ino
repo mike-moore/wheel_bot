@@ -27,7 +27,7 @@ const long cycleTimeNav = 200;
 unsigned long previousMillisNav = 0;
 const long cycleTimeGuidance = 1000;
 unsigned long previousMillisGuidance = 0;
-const long cycleTimeRpmCompute = 5;
+const long cycleTimeRpmCompute = 100;
 unsigned long previousMillisRpmCompute = 0;
 const long cycleTimeControl = 10;
 unsigned long previousMillisControl = 0;
@@ -38,8 +38,7 @@ volatile long int mtrR_encoderCount = 0;
 volatile long int mtrL_encoderCount = 0;
 long mtrR_encoderCountPrev = 0;
 long mtrL_encoderCountPrev = 0;
-const long int countsToRpms = 60*(1000/cycleTimeControl)/360;
-const float rpmAlphaFilter = 0.3;
+const long int countsToRpms = 60*(1000/cycleTimeRpmCompute)/360;
 
 // - Motor speeds. Computed here due to use of interrupts
 int mtrR_speed = 0; int mtrR_speed_prev = 0;
@@ -88,16 +87,16 @@ void loop(){
   }
 
   // /// - Guidance
-  // if (currentMillis - previousMillisGuidance >= cycleTimeGuidance) {
-  //   previousMillisGuidance = currentMillis;
-  //   guidance.Execute();
-  // }
+  if (currentMillis - previousMillisGuidance >= cycleTimeGuidance) {
+     previousMillisGuidance = currentMillis;
+     guidance.Execute();
+   }
 
   // /// - Compute motor rpms
-  // if (currentMillis - previousMillisRpmCompute >= cycleTimeRpmCompute) {
-  //   previousMillisRpmCompute = currentMillis;
-  //   computeMotorSpeeds();
-  // }
+  if (currentMillis - previousMillisRpmCompute >= cycleTimeRpmCompute) {
+     previousMillisRpmCompute = currentMillis;
+     computeMotorSpeeds();
+  }
   
   // /// - Control
   // if (currentMillis - previousMillisControl >= cycleTimeControl) {
@@ -123,15 +122,11 @@ void computeMotorSpeeds(){
 
 void computeRightMotorSpeed()  {                                                    
  mtrR_speed = (mtrR_encoderCount - mtrR_encoderCountPrev)*countsToRpms;
- mtrR_speed = (1-rpmAlphaFilter)*mtrR_speed + rpmAlphaFilter*mtrR_speed_prev;
- mtrR_speed_prev = mtrR_speed;
  mtrR_encoderCountPrev = mtrR_encoderCount;                   
 }
 
 void computeLeftMotorSpeed()  {                                                    
  mtrL_speed = (mtrL_encoderCount - mtrL_encoderCountPrev)*countsToRpms;
- mtrL_speed = (1-rpmAlphaFilter)*mtrL_speed + rpmAlphaFilter*mtrL_speed_prev;
- mtrL_speed_prev = mtrL_speed;
  mtrL_encoderCountPrev = mtrL_encoderCount;                  
 }
 
