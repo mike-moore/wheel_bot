@@ -15,7 +15,7 @@ class RobotTerminal(Cmd):
 
     def __init__(self):
         Cmd.__init__(self)
-        self.portName = "/dev/ttyUSB0"
+        self.portName = "/dev/ttyACM0"
         self.serialComm = SerialCommunication(self.portName)
         self.serialComm.CommFrequency = 0.04
 
