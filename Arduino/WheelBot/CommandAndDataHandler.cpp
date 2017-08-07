@@ -77,7 +77,7 @@ void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
     }
     if(rover_cmd.Id == CMD_L_MOTOR_RPM){
         Serial.println("CMD L MOTOR RPM");
-        if (State.ManualDriveMode = true){
+        if (State.ManualDriveMode == true){
             PackInt(CMD_ACCEPT);
             State.CmdLeftMotorRpm = rover_cmd.Value;
         }else{
@@ -86,7 +86,7 @@ void CommandAndDataHandler::ProcessRoverCmd(IdValuePairFloat & rover_cmd) {
     }
     if(rover_cmd.Id == CMD_R_MOTOR_RPM){
         Serial.println("CMD R MOTOR RPM");
-        if (State.ManualDriveMode = true){
+        if (State.ManualDriveMode == true){
             PackInt(CMD_ACCEPT);
             State.CmdRightMotorRpm = rover_cmd.Value;
         }else{
