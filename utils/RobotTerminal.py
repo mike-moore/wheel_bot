@@ -22,6 +22,34 @@ class RobotTerminal(Cmd):
         """Exits the terminal"""
         raise SystemExit
 
+    def do_connect_controller(self, args):
+        xboxController = xbox.Joystick()
+        self.serialComm.commandManualDrive()
+        print "###################################################"
+        print "# WheelBot Controls "
+        print "###################################################"
+        print "Exit/Stop Control           :        Back button"
+        print "Drive forward               :        Right Trigger"
+        print "Drive backward              :        Left Trigger"
+        print "Drive left/right            :        Left Joystick"
+        print "###################################################"
+        # Loop until back button is pressed
+        while not joy.Back():
+            # Show connection status
+            if joy.connected():
+                print "Connected   "
+            else:
+                print "Disconnected"
+                break
+            print "Left/Right value : " + str(joy.leftX())
+            print "Drive Fwd Throttle : " + str(joy.rightTrigger())
+            print "Drive Bwd Throttle : " + str(joy.leftTrigger())
+        print "###################################################"
+        print "# Stopping manual control. Exiting...."
+        print "###################################################"
+        self.serialComm.stopManualDrive()
+        xboxController.close()
+
     def do_heading_filter_analysis(self, args):
         """ Gets the heading"""
         data = np.genfromtxt(args, delimiter=',', names=['heading'])
