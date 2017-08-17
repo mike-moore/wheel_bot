@@ -21,6 +21,11 @@ void Control::Execute() {
             if (State.DoTestDrive){
                 Mode = TEST_DRIVE;
             }
+            // - Monitor for manual drive command. 
+            //   Initiates manual drive mode.
+            if (State.ManualDriveMode){
+                Mode = MANUAL_DRIVE_CTRL;
+            }
         break;
 
         case ROTATIONAL_CTRL:
@@ -50,7 +55,18 @@ void Control::Execute() {
             _testDrive();
             if (!State.DoTestDrive){
                 Mode = IDLE;
-                _testDriveState = FWD_POS_TEST;
+                _testDriveState = DRIVE_FWD_OL;
+            }
+
+        break;
+
+        case MANUAL_DRIVE_CTRL:
+            State.effectors.leftMotor.VelocityCmd(State.CmdLeftMotorRpm);
+            State.effectors.rightMotor.VelocityCmd(State.CmdRightMotorRpm);
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
+            if (!State.ManualDriveMode){
+                Mode = IDLE;
             }
 
         break;
@@ -130,110 +146,96 @@ void Control::_printDistanceDebug(){
     Serial.println(_positionCmd);
 }
 
-void Control::_performRotationControl(){
-    float error = abs(State.HeadingError);
-    _velocityCmd += _Kp*error + _Kd*error;
-    _velocityCmd = constrain(_velocityCmd, -30, 30);
-}
-
 void Control::_testDrive(){
-
-    float lengthOfTestInSeconds = 20.0;
-    float maxRpm = 35.0;
-    float velocityCmd = 0.0;
     switch(_testDriveState)
     {
-        case FWD_POS_TEST:
+        case DRIVE_FWD_OL:
             if(_firstPass){
-                Serial.println("FWD POSITION TEST STARTING");
                 State.effectors.rightMotor.FwdPositionCmd(720); 
                 State.effectors.leftMotor.FwdPositionCmd(720); 
                 _firstPass=false;
             }
-            /// - Keep running the controller until it's put back in to the IDLE
-            ///   mode
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
-
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
-                Serial.println("FWD POSITION TEST COMPLETE");
                 _firstPass = true;
-                _testDriveState = TURN_RIGHT_TEST;
+                _testDriveState = TURN_RIGHT_OL;
             }
-
         break;
 
-        case TURN_RIGHT_TEST:
+        case TURN_RIGHT_OL:
             if(_firstPass){
-                Serial.println("RIGHT TURN POSITION TEST STARTING");
-                State.effectors.rightMotor.BwdPositionCmd(305); 
-                State.effectors.leftMotor.FwdPositionCmd(305); 
+                State.effectors.rightMotor.BwdPositionCmd(648); 
+                State.effectors.leftMotor.FwdPositionCmd(648); 
                 _firstPass=false;
             }
-            /// - Keep running the controller until it's put back in to the IDLE
-            ///   mode
             State.effectors.rightMotor.run();
             State.effectors.leftMotor.run();
 
             if (State.effectors.leftMotor.ReachedPosition() && 
                 State.effectors.rightMotor.ReachedPosition()) {
-                Serial.println("RIGHT TURN POSITION TEST COMPLETE");
-                //Serial.println("SPEED UP VELOCITY TEST STARTING");
                 _firstPass = true;
-                //_testDriveState = SPEED_UP_VEL_TEST;
-                _testDriveState = FWD_POS_TEST;
+                _testDriveState = DRIVE_FWD_OL;
+                _TurnRightCount++;
+            }
+
+            // - Swap over to closed loop after 2 turns
+            if (_TurnRightCount >= 2){
+                _TurnRightCount = 0;
+                _firstPass = true;
+                delay(10000);
+                _testDriveState = DRIVE_FWD_CL;
             }
 
         break;
 
-        case SPEED_UP_VEL_TEST:
-            /// - Used to ramp up the velocity command
-            lengthOfTestInSeconds = 20.0;
-            maxRpm = 30.0;
-            _numSecondsInTest += (float) cycleTimeControl/1000.0;
-            /// - Set the velocity command proportionally to the length of time
-            ///   in this test velocity mode. R motor gets positive vel cmd,
-            ///   L motor gets negative vel cmd
-            velocityCmd = _numSecondsInTest/lengthOfTestInSeconds*maxRpm;
-            State.effectors.rightMotor.VelocityCmd(velocityCmd); 
-            State.effectors.leftMotor.VelocityCmd(velocityCmd); 
-            /// - Run the motor controller until the end of the test
-            if (_numSecondsInTest < lengthOfTestInSeconds) {
-                State.effectors.rightMotor.run();
-                State.effectors.leftMotor.run();
-            }else{
-                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
-                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
-                Serial.println("SPEED UP VELOCITY TEST COMPLETE");
-                _testDriveState = SLOW_DOWN_VEL_TEST;
-                Serial.println("SLOW DOWN VELOCITY TEST STARTING");
-                _numSecondsInTest = 0.0;
+        case DRIVE_FWD_CL:
+            if(_firstPass){
+                State.ClosedLoopControl = true;
+                State.effectors.rightMotor.ClosedLoopControl = true;
+                State.effectors.leftMotor.ClosedLoopControl = true;
+                State.effectors.rightMotor.FwdPositionCmd(720); 
+                State.effectors.leftMotor.FwdPositionCmd(720); 
+                _firstPass=false;
             }
-        break; 
-            
-        case SLOW_DOWN_VEL_TEST:
-            /// - Used to ramp up the velocity command
-            lengthOfTestInSeconds = 20.0;
-            maxRpm = 30.0;
-            _numSecondsInTest += (float) cycleTimeControl/1000.0;
-            /// - Set the velocity command proportionally to the length of time
-            ///   in this test velocity mode. R motor gets positive vel cmd,
-            ///   L motor gets negative vel cmd
-            velocityCmd = (1-_numSecondsInTest/lengthOfTestInSeconds)*maxRpm;
-            State.effectors.rightMotor.VelocityCmd(velocityCmd); 
-            State.effectors.leftMotor.VelocityCmd(velocityCmd); 
-            /// - Run the motor controller until the end of the test
-            if (_numSecondsInTest < lengthOfTestInSeconds) {
-                State.effectors.rightMotor.run();
-                State.effectors.leftMotor.run();
-            }else{
-                State.effectors.rightMotor.ControlMode = Spg30MotorDriver::IDLE;
-                State.effectors.leftMotor.ControlMode = Spg30MotorDriver::IDLE;
-                Serial.println("SLOW DOWN VELOCITY TEST COMPLETE");
-                _testDriveState = FWD_POS_TEST;
-                _numSecondsInTest = 0.0;
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition()) {
+                _firstPass = true;
+                _testDriveState = TURN_RIGHT_CL;
             }
-        break;     
+        break;
+
+        case TURN_RIGHT_CL:
+            if(_firstPass){
+                State.effectors.rightMotor.BwdPositionCmd(648); 
+                State.effectors.leftMotor.FwdPositionCmd(648); 
+                _firstPass=false;
+            }
+            State.effectors.rightMotor.run();
+            State.effectors.leftMotor.run();
+
+            if (State.effectors.leftMotor.ReachedPosition() && 
+                State.effectors.rightMotor.ReachedPosition()) {
+                _firstPass = true;
+                _testDriveState = DRIVE_FWD_CL;
+                _TurnRightCount++;
+            }
+
+            // - Stop test drive after 2 closed loop turns
+            if (_TurnRightCount >= 2){
+                _TurnRightCount = 0;
+                _testDriveState = DRIVE_FWD_OL;
+                State.DoTestDrive = false;
+                State.ClosedLoopControl = false;
+                Mode = IDLE;
+                State.effectors.rightMotor.ClosedLoopControl = false;
+                State.effectors.leftMotor.ClosedLoopControl = false;
+            }
+
+        break;
+
     }
 }

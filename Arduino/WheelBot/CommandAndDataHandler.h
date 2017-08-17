@@ -5,7 +5,6 @@
 /// @author
 ///         $Author: Mike Moore $
 ///
-/// Contact: mike.moore@so.engineering
 ///
 /// Created on: March 23 2017
 ///
@@ -35,7 +34,7 @@ class CommandAndDataHandler {
   CommandPacket& Commands;
   TelemetryPacket& Telemetry;
   RobotState& State;
-  bool SendResponseSignal;
+  bool SendMotorRpms;
   void ClearTelemetry();
   void ProcessRoverCmd(IdValuePairFloat & rover_cmd);
   void ProcessWayPointCmd(WayPoint & way_point_cmd);

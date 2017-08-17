@@ -5,8 +5,6 @@
 /// @author
 ///         $Author: Mike Moore $
 ///
-/// Contact: mike.moore@so.engineering
-///
 /// Created on: March 23 2017
 ///
 ///////////////////////////////////////////////////////////////
@@ -23,19 +21,19 @@
 class Control { 
  public:
     Control(RobotState& state) : State(state), _velocityCmd(0.0), 
-            _positionCmd(0.0), _Kp(5.0), _Kd(0.5), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
-            Mode(IDLE), _testDriveState(FWD_POS_TEST), _numSecondsInTest(0.0),
-            _firstPass(true) {};
-
+            _positionCmd(0.0), MotorRotDegPerFt(330), MotorRotDegPerDegHeading(3.6), _lastMilliPrint(0),
+            Mode(IDLE), _testDriveState(DRIVE_FWD_OL), _firstPass(true), _prevError(0.0), _errorAccum(0.0), _Kp_Left(0.155), _Kp_Right(0.165),
+            _Ki_Right(0.0001), _Ki_Left(0.0001), _Kd_Right(0.0001), _Kd_Left(0.0001), _TurnRightCount(0), _cmdHeading(0.0) {};
+ 
     ~Control(){};
 
     void Execute();
 
  private:
-
     bool _headingError();
     void _checkForDistanceControl();
     void _checkForHeadingControl();
+    void _performHeadingControl();
     bool _distanceError();
     void _printHeadingDebug();
     void _printDistanceDebug();
@@ -44,8 +42,6 @@ class Control {
     RobotState& State;
     float _velocityCmd;
     float _positionCmd;
-    float _Kp;
-    float _Kd;
     uint16_t MotorRotDegPerFt;
     float MotorRotDegPerDegHeading;
     unsigned long _lastMilliPrint;
@@ -54,20 +50,28 @@ class Control {
       IDLE                = 0,
       ROTATIONAL_CTRL     = 1,
       TRANSLATIONAL_CTRL  = 2,
-      TEST_DRIVE          = 4
+      TEST_DRIVE          = 3,
+      MANUAL_DRIVE_CTRL   = 4
     }ControlMode;
     ControlMode Mode;
-	// Moding used for a test drive
-	enum TestDriveRoute
-	{
-	    FWD_POS_TEST = 0,
-	    TURN_RIGHT_TEST = 1,
-	    SPEED_UP_VEL_TEST = 2,
-      SLOW_DOWN_VEL_TEST = 3     
-	};
-    TestDriveRoute _testDriveState;
-    float _numSecondsInTest;
+    enum TestDriveRoute
+    {
+        DRIVE_FWD_OL       = 0,
+        TURN_RIGHT_OL      = 1,
+        DRIVE_FWD_CL       = 2,
+        TURN_RIGHT_CL      = 3  
+    } _testDriveState;
     bool _firstPass;
+    float _prevError;
+    float _errorAccum;
+    float _Kp_Left;
+    float _Kp_Right;
+    float _Ki_Right;
+    float _Ki_Left;
+    float _Kd_Right;
+    float _Kd_Left;
+    uint16_t _TurnRightCount;
+    float _cmdHeading;
 };
   
 

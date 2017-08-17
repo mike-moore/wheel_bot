@@ -6,8 +6,6 @@
 /// @author
 ///         $Author: Mike Moore $
 ///
-/// Contact: michael.moore@nasa.gov
-///
 /// Created on: February 5 2017
 ///
 ///////////////////////////////////////////////////////////////
@@ -16,7 +14,7 @@
 
 #include <Arduino.h>
 
-#define MTR_DEADBAND_LOW 125
+#define MTR_DEADBAND_LOW 15
 static const int _pwmLookup[30] =
 {
     MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW, MTR_DEADBAND_LOW,
@@ -50,9 +48,9 @@ class Spg30MotorDriver {
   enum MotorSpeeds
   {
       STOP         = 0,
-      VEL_LOW      = 100,
-      VEL_MEDIUM   = 200,
-      VEL_HIGH     = 255
+      VEL_LOW      = 15,
+      VEL_MEDIUM   = 20,
+      VEL_HIGH     = 23
   };
   /// @brief The motor speed used for position control.
   /// @note  This is irrelevant for velocity control.
@@ -68,6 +66,11 @@ class Spg30MotorDriver {
   /// @brief Functions the user can call to see if their commanded
   ///        position and velocity have been reached.
   bool ReachedPosition();
+  bool ClosedLoopControl;
+  /// @brief Getters for encoder count and motor speed.
+  ///        Both represented as floats.
+  float getCount();
+  float getSpeed();
  private:
   void _pidControl();
   void _updatePid();
@@ -138,6 +141,15 @@ inline void Spg30MotorDriver::_cmdPosition(uint16_t positionCmd){
     _positionReached = false;
     ControlMode = POSITION;
   }
+}
+
+
+inline float Spg30MotorDriver::getCount(){
+  return (float) _encoderCount;
+}
+
+inline float Spg30MotorDriver::getSpeed(){
+  return _measuredSpeed;
 }
 
 #endif

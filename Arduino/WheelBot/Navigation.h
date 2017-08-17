@@ -5,8 +5,6 @@
 /// @author
 ///         $Author: Mike Moore $
 ///
-/// Contact: mike.moore@so.engineering
-///
 /// Created on: March 23 2017
 ///
 ///////////////////////////////////////////////////////////////
@@ -14,6 +12,9 @@
 #define NAVIGATION_H
 
 #include "RobotState.h"
+
+#define SIZE_HEADING_BUFFER 10
+#define SIZE_ERROR_BUFFER 10
 
 ///////////////////////////////////////////////////////////////
 /// @class Navigation
@@ -27,9 +28,13 @@ class Navigation {
 
     void InitSensors();
     void Execute();
+    float getFilteredHeading(float sensedHeading);
+    float sensedHeadingBuffer[SIZE_HEADING_BUFFER];
 
  private:
+    void avgError();
     RobotState& State;
+    float _errorBuffer[SIZE_ERROR_BUFFER];
 };
   
 

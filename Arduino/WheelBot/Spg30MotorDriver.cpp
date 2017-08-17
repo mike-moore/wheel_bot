@@ -4,6 +4,7 @@ Spg30MotorDriver::Spg30MotorDriver(uint_least8_t motorPinA1,
                    uint_least8_t motorPinB1, uint_least8_t pwmPin, volatile long & encoderCount, int & motorSpeed) :
     ControlMode(IDLE),
     MotorSpeed(VEL_HIGH),
+    ClosedLoopControl(false),
     _motorPinA1(motorPinA1),
     _motorPinB1(motorPinB1),
     _pwmPin(pwmPin),
@@ -67,27 +68,21 @@ void Spg30MotorDriver::run(){
 }
 
 void Spg30MotorDriver::_pidControl(){
-	  	_updatePid();
-	  	analogWrite(_pwmPin, _pwmCmd);
-    _printMotorInfo();
+    _updatePid();
+    analogWrite(_pwmPin, _pwmCmd);
+    //_printMotorInfo();
 }
 
 void Spg30MotorDriver::_updatePid(){
-    float pidTerm = 0;
-    int error=0;                                  
-	  if (_velocityCmd < 0.0){
-	     	digitalWrite(_motorPinA1, HIGH);
-	     	digitalWrite(_motorPinB1, LOW);                  
+    if (_velocityCmd < 0.0){
+        digitalWrite(_motorPinA1, HIGH);
+        digitalWrite(_motorPinB1, LOW);                  
 	  }else {
-	      digitalWrite(_motorPinA1, LOW);
-	     	digitalWrite(_motorPinB1, HIGH);    
+        digitalWrite(_motorPinA1, LOW);
+        digitalWrite(_motorPinB1, HIGH);    
 	  }
-	  error = abs(_velocityCmd) - abs(_measuredSpeed); 
-    error = constrain(error, -10, 10);
-    _errorAccum = constrain(_errorAccum, -150, 150);
-	  pidTerm = _pwmLookup[abs(_velocityCmd)] + (_Kp * error) + (_Ki * _errorAccum);                            
-    _errorAccum += error;
-	  _pwmCmd = constrain(int(pidTerm), MTR_DEADBAND_LOW, 255);
+    _pwmCmd = abs(_velocityCmd)*(255/30.0);
+	_pwmCmd = constrain(int(_pwmCmd), 0, 255);
 }
 
 void Spg30MotorDriver::_positionControl(){
@@ -100,16 +95,26 @@ void Spg30MotorDriver::_positionControl(){
 }
 
 void Spg30MotorDriver::_motorForward(){
-   analogWrite(_pwmPin, MotorSpeed);
-   digitalWrite(_motorPinA1, LOW);
-   digitalWrite(_motorPinB1, HIGH);
+   if (ClosedLoopControl){
+       _velocityCmd = MotorSpeed;
+       _pidControl();
+   }else{
+       analogWrite(_pwmPin, 255);
+       digitalWrite(_motorPinA1, LOW);
+       digitalWrite(_motorPinB1, HIGH);
+   }
    _motorIsRunning = true;
 }
 
 void Spg30MotorDriver::_motorBackward(){
-   analogWrite(_pwmPin, MotorSpeed);
-   digitalWrite(_motorPinA1, HIGH);
-   digitalWrite(_motorPinB1, LOW);
+   if (ClosedLoopControl){
+       _velocityCmd = -MotorSpeed;
+       _pidControl();
+   }else{
+       analogWrite(_pwmPin, 255);
+       digitalWrite(_motorPinA1, HIGH);
+       digitalWrite(_motorPinB1, LOW);
+   }
    _motorIsRunning = true;
 }
 
@@ -123,7 +128,7 @@ void Spg30MotorDriver::_motorBrake(){
 void Spg30MotorDriver::_printMotorInfo(){  
   if((millis()-_lastMilliPrint) >= 500){                     
         _lastMilliPrint = millis();
-        Serial.print("Error Accum:");             Serial.println(_errorAccum);  
+        Serial.print("Error Accum:");    Serial.println(_errorAccum);  
         Serial.print("SP:");             Serial.println(_velocityCmd);  
         Serial.print("  RPM:");          Serial.println(_measuredSpeed);
         Serial.print("  PWM:");          Serial.println(_pwmCmd);

@@ -23,11 +23,11 @@ const long cycleTimeCommRx = 20;
 unsigned long previousMillisCommRx = 0;
 const long cycleTimeCommTx = 20;
 unsigned long previousMillisCommTx = 0;
-const long cycleTimeNav = 2000;
+const long cycleTimeNav = 200;
 unsigned long previousMillisNav = 0;
 const long cycleTimeGuidance = 1000;
 unsigned long previousMillisGuidance = 0;
-const long cycleTimeRpmCompute = 5;
+const long cycleTimeRpmCompute = 100;
 unsigned long previousMillisRpmCompute = 0;
 const long cycleTimeControl = 10;
 unsigned long previousMillisControl = 0;
@@ -38,8 +38,7 @@ volatile long int mtrR_encoderCount = 0;
 volatile long int mtrL_encoderCount = 0;
 long mtrR_encoderCountPrev = 0;
 long mtrL_encoderCountPrev = 0;
-const long int countsToRpms = 60*(1000/cycleTimeControl)/360;
-const float rpmAlphaFilter = 0.3;
+const long int countsToRpms = 60*(1000/cycleTimeRpmCompute)/360;
 
 // - Motor speeds. Computed here due to use of interrupts
 int mtrR_speed = 0; int mtrR_speed_prev = 0;
@@ -51,7 +50,6 @@ bool mtrR_A_set, mtrR_B_set;
 void setup(){
   // - Serial comm init
   serialComm.InitHw();
-  // - Init sensors
   navigation.InitSensors();
   // - Very Important: attach interrupt service routines for motor encoders
   setup_encoders();
@@ -69,8 +67,7 @@ void setup_encoders(){
 }
 
 void loop(){
-  unsigned long currentMillis = millis();
-  // Disable all interrupts for Communication System; time sensitive
+  unsigned long currentMillis = millis(); 
   /// - Comm Rx
   if (currentMillis - previousMillisCommRx >= cycleTimeCommRx) {
     previousMillisCommRx = currentMillis;
@@ -82,27 +79,26 @@ void loop(){
       cmdAndDataHandler.ProcessCmds();
     }
   }
-  
-  // Enable all interrupts 
+
   /// - Navigation
   if (currentMillis - previousMillisNav >= cycleTimeNav) {
     previousMillisNav = currentMillis;
     navigation.Execute();
   }
 
-  /// - Guidance
+  // /// - Guidance
   if (currentMillis - previousMillisGuidance >= cycleTimeGuidance) {
-    previousMillisGuidance = currentMillis;
-    guidance.Execute();
-  }
+     previousMillisGuidance = currentMillis;
+     guidance.Execute();
+   }
 
-  /// - Compute motor rpms
+  // /// - Compute motor rpms
   if (currentMillis - previousMillisRpmCompute >= cycleTimeRpmCompute) {
-    previousMillisRpmCompute = currentMillis;
-    computeMotorSpeeds();
+     previousMillisRpmCompute = currentMillis;
+     computeMotorSpeeds();
   }
   
-  /// - Control
+  // /// - Control
   if (currentMillis - previousMillisControl >= cycleTimeControl) {
     previousMillisControl = currentMillis;
     control.Execute();
@@ -126,15 +122,11 @@ void computeMotorSpeeds(){
 
 void computeRightMotorSpeed()  {                                                    
  mtrR_speed = (mtrR_encoderCount - mtrR_encoderCountPrev)*countsToRpms;
- mtrR_speed = (1-rpmAlphaFilter)*mtrR_speed + rpmAlphaFilter*mtrR_speed_prev;
- mtrR_speed_prev = mtrR_speed;
  mtrR_encoderCountPrev = mtrR_encoderCount;                   
 }
 
 void computeLeftMotorSpeed()  {                                                    
  mtrL_speed = (mtrL_encoderCount - mtrL_encoderCountPrev)*countsToRpms;
- mtrL_speed = (1-rpmAlphaFilter)*mtrL_speed + rpmAlphaFilter*mtrL_speed_prev;
- mtrL_speed_prev = mtrL_speed;
  mtrL_encoderCountPrev = mtrL_encoderCount;                  
 }
 
