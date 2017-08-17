@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy
 import scipy.fftpack
+import xbox
 
 class RobotTerminal(Cmd):
 
@@ -23,7 +24,9 @@ class RobotTerminal(Cmd):
         raise SystemExit
 
     def do_connect_controller(self, args):
+        """Connects the xbox controller"""
         xboxController = xbox.Joystick()
+        sleep(1)
         self.serialComm.commandManualDrive()
         print "###################################################"
         print "# WheelBot Controls "
@@ -34,16 +37,19 @@ class RobotTerminal(Cmd):
         print "Drive left/right            :        Left Joystick"
         print "###################################################"
         # Loop until back button is pressed
-        while not joy.Back():
+        while not xboxController.Back():
             # Show connection status
-            if joy.connected():
+            if xboxController.connected():
                 print "Connected   "
             else:
                 print "Disconnected"
                 break
-            print "Left/Right value : " + str(joy.leftX())
-            print "Drive Fwd Throttle : " + str(joy.rightTrigger())
-            print "Drive Bwd Throttle : " + str(joy.leftTrigger())
+            print "Left/Right value : " + str(xboxController.leftX())
+            print "Drive Fwd Throttle : " + str(xboxController.rightTrigger())
+            print "Drive Bwd Throttle : " + str(xboxController.leftTrigger())
+            self.serialComm.commandMotorRpms(xboxController.rightTrigger()*30.0, xboxController.rightTrigger()*30.0)
+            self.serialComm.commandMotorRpms(-xboxController.leftTrigger()*30.0, -xboxController.leftTrigger()*30.0)
+            #sleep(0.1)
         print "###################################################"
         print "# Stopping manual control. Exiting...."
         print "###################################################"
@@ -119,7 +125,7 @@ class RobotTerminal(Cmd):
             print "The sensed heading is : " + str(heading)
 
     def do_get_motor_data(self, args):
-        """ Gets the motor data"""
+        """ Gets motor readings"""
         motor_data = self.serialComm.getMotorData()
         if motor_data:
             print "#################################################################"
@@ -163,6 +169,7 @@ class RobotTerminal(Cmd):
         self.serialComm.stopManualDrive()
 
     def do_command_motors(self, args):
+        """Commands motors to an rpm"""
         try:
             print "Desired Left Motor RPM : "
             left_motor_rpm = float(raw_input())
@@ -173,6 +180,7 @@ class RobotTerminal(Cmd):
         self.serialComm.commandMotorRpms(left_motor_rpm, right_motor_rpm)
 
     def do_command_motor_trajectory(self, args):
+        """Commands the motors trajectory"""
         with open(args) as trajectory_file:
             trajectory_reader = csv.DictReader(trajectory_file)
             for row in trajectory_reader:
